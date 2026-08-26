@@ -1,5 +1,5 @@
-from database import SessionLocal, Base, engine
-from models import Branch
+from .database import SessionLocal, Base, engine   # ✅ Added dot
+from .models import Branch                        # ✅ Added dot
 
 # Create tables
 Base.metadata.create_all(bind=engine)

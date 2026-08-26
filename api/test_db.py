@@ -1,5 +1,5 @@
-from database import SessionLocal, engine
-from models import Branch
+from .database import SessionLocal, engine   # ✅ Added dot
+from .models import Branch                  # ✅ Added dot
 
 def test_connection():
     try:

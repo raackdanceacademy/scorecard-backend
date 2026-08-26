@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey
 from sqlalchemy.sql import func
-from database import Base
+from .database import Base   # ✅ Fixed: added the dot for relative import
 
 class Branch(Base):
     __tablename__ = "branches"

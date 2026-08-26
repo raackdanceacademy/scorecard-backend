@@ -5,13 +5,11 @@ class ITSubmissionIn(BaseModel):
     report_month: str
 
     # ===== Operations Discipline =====
-    # REMOVED: classes_planned, classes_conducted, trainer_attendance
     attendance_recording: float
     crm_usage: float
     report_submission: float
 
     # ===== Brand & Quality Compliance =====
-    # REMOVED: hygiene_score, curriculum_compliance, trainer_certification
     branding_compliance: float
     mystery_audit_score: float
 
@@ -43,12 +41,10 @@ class ITSubmissionIn(BaseModel):
     new_enrollments: int
     dropouts: int
     closing_students: int = 0
-    # REMOVED: batch_utilization, trials_conducted, trial_conversions
 
     # ===== Local Marketing & Community =====
     marketing_activities: int = 0
     partnerships: int = 0
-    # REMOVED: social_media_posts, events_workshops
 
     # ===== Penalty Flags =====
     unauthorized_discount: str = 'No'
