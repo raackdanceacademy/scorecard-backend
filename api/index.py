@@ -13,9 +13,9 @@ app = FastAPI(title="RAACK Scorify", version="1.0.0")
 # ============================================================
 
 # Because index.py is inside the "api" folder, we need to go up one level to find "static"
-current_dir = os.path.dirname(os.path.abspath(__file__)) # Points to .../backend/api
-parent_dir = os.path.dirname(current_dir)                # Points to .../backend
-static_dir = os.path.join(parent_dir, "static")          # Points to .../backend/static
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)              # Step up one folder
+static_dir = os.path.join(parent_dir, "static")         # Points to .../backend/static
 
 # Mount the /static path
 if os.path.exists(static_dir):
