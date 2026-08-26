@@ -9,11 +9,13 @@ from mangum import Mangum
 app = FastAPI(title="RAACK Scorify", version="1.0.0")
 
 # ============================================================
-# STATIC FILES – Serve from /static and also from root
+# STATIC FILES – FIXED PATH TO LOOK ONE FOLDER UP
 # ============================================================
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-static_dir = os.path.join(current_dir, "static")
+# Because index.py is inside the "api" folder, we need to go up one level to find "static"
+current_dir = os.path.dirname(os.path.abspath(__file__)) # Points to .../backend/api
+parent_dir = os.path.dirname(current_dir)                # Points to .../backend
+static_dir = os.path.join(parent_dir, "static")          # Points to .../backend/static
 
 # Mount the /static path
 if os.path.exists(static_dir):
