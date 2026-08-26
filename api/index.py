@@ -5,23 +5,38 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from mangum import Mangum
 
-# --- Uncomment these when your database is ready ---
-# from database import Base, engine, get_db
-# from models import Branch, ITSubmission, MonthlyScore
-# from schemas import ITSubmissionIn
-# from scoring import compute_full_score
-
-app = FastAPI(
-    title="RAACK Scorify — Smart Franchise Performance Scoring Platform",
-    version="1.0.0"
-)
+app = FastAPI(title="RAACK Scorify", version="1.0.0")
 
 # ============================================================
-# USE THE PUBLIC FOLDER (Fallback if API is hit directly)
+# BULLETPROOF STATIC FILE FINDER (Prints paths to Vercel Logs)
 # ============================================================
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)  # Points to backend/
-public_dir = os.path.join(parent_dir, "public")
+parent_dir = os.path.dirname(current_dir)
+
+# List of all possible locations to find your index.html
+possible_paths = [
+    os.path.join(os.getcwd(), "public"),
+    os.path.join(parent_dir, "public"),
+    os.path.join(os.getcwd(), "static"),
+    os.path.join(parent_dir, "static"),
+]
+
+public_dir = None
+for path in possible_paths:
+    if os.path.exists(path):
+        public_dir = path
+        break
+
+if not public_dir:
+    public_dir = possible_paths[0]
+
+# *** CRITICAL: These lines show up in your Vercel Logs ***
+print(f"🔍 Current Working Dir: {os.getcwd()}")
+print(f"🔍 Parent Dir: {parent_dir}")
+print(f"📁 Checking Path: {public_dir}")
+print(f"📁 Does it exist? {os.path.exists(public_dir)}")
+if os.path.exists(public_dir):
+    print(f"📁 Files inside: {os.listdir(public_dir)}")
 
 def _serve_page(filename: str):
     file_path = os.path.join(public_dir, filename)
@@ -30,7 +45,7 @@ def _serve_page(filename: str):
     return {"error": f"File {filename} not found"}
 
 # ============================================================
-# HTML PAGE ROUTES (Vercel will usually handle these first)
+# HTML PAGE ROUTES
 # ============================================================
 @app.get("/")
 async def serve_landing(): return _serve_page("index.html")
@@ -44,7 +59,7 @@ async def serve_it_form(): return _serve_page("it-form.html")
 async def serve_formula(): return _serve_page("formula.html")
 
 # ============================================================
-# LOGIN API (Hardcoded – works WITHOUT a database)
+# LOGIN API (Hardcoded)
 # ============================================================
 ROLE_CREDENTIALS = {
     "it": {"mobile": "9000000001", "password": "it@123"},
@@ -81,14 +96,8 @@ async def login(payload: LoginIn):
         return {"status": "ok", "access_token": token, "role": "franchise", "username": username, "branch": franchise["branch"], "redirect": f"/dashboard?role=franchise&branch={franchise['branch']}"}
     raise HTTPException(status_code=401, detail="Invalid username or password.")
 
-# ============================================================
-# HEALTH CHECK
-# ============================================================
 @app.get("/api/health")
 async def health_check():
     return {"status": "ok", "app": "RAACK Scorify", "version": "1.0.0"}
 
-# ============================================================
-# CRITICAL: VERCELL HANDLER – MUST BE AT THE BOTTOM
-# ============================================================
 handler = Mangum(app)
