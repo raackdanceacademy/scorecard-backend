@@ -2,6 +2,7 @@ import os
 import secrets
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from mangum import Mangum
 
@@ -19,6 +20,9 @@ app = FastAPI(title="RAACK Scorify", version="1.0.0")
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 static_dir = os.path.join(parent_dir, "static")  # Use "public" if you renamed it
+
+# Serve everything under /static/* (logos, icons, etc.) directly from the static folder
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 def _serve_page(filename: str):
     file_path = os.path.join(static_dir, filename)
