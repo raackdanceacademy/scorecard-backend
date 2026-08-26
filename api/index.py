@@ -8,10 +8,10 @@ from pydantic import BaseModel
 from mangum import Mangum
 from sqlalchemy.orm import Session
 
-from database import Base, engine, get_db, SessionLocal
-from models import Branch, ITSubmission, MonthlyScore
-from schemas import ITSubmissionIn
-from scoring import compute_full_score, get_quarter_start_month, safe_div
+from .database import Base, engine, get_db, SessionLocal
+from .models import Branch, ITSubmission, MonthlyScore
+from .schemas import ITSubmissionIn
+from .scoring import compute_full_score, get_quarter_start_month, safe_div
 
 app = FastAPI(title="RAACK Scorify", version="1.0.0")
 
