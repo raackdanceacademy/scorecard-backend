@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scoring Formula — RAACK Scorify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#f4f2f1; --base:#ffffff; --surface:#ffffff; --surface-2:#f7f5f4; --surface-3:#efece9;
+  --line:#e1dcd8; --line-soft:rgba(0,0,0,0.06);
+  --maroon-900:#3a0e15; --maroon-700:#701f2a; --maroon-600:#8a2534; --maroon-500:#a52e3f; --maroon-400:#c8465a;
+  --grey-300:#55494c; --grey-500:#8a8286;
+  --white:#1c1a1b; --white-dim:#4a4448;
+  --shadow-lg: 0 24px 50px -20px rgba(0,0,0,0.14), 0 8px 18px -10px rgba(0,0,0,0.08);
+  --shadow-sm: 0 10px 22px -14px rgba(0,0,0,0.10);
+}
+[data-theme="dark"]{
+  --void:#0a0809; --base:#121012; --surface:#181516; --surface-2:#201b1d; --surface-3:#241f21;
+  --line:#2c262a; --line-soft:rgba(255,255,255,0.06);
+  --grey-300:#9d9599; --grey-500:#736b6f;
+  --white:#f7f2f0; --white-dim:#cfc6c8;
+  --shadow-lg: 0 30px 60px -20px rgba(0,0,0,0.65), 0 10px 24px -10px rgba(0,0,0,0.5);
+  --shadow-sm: 0 10px 24px -12px rgba(0,0,0,0.55);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Inter',system-ui,sans-serif;font-size:16px;color:var(--white);
+  background:
+    radial-gradient(ellipse 800px 500px at 10% 0%, rgba(138,37,52,0.14), transparent 55%),
+    radial-gradient(ellipse 700px 500px at 90% 100%, rgba(112,31,42,0.10), transparent 55%),
+    linear-gradient(180deg, var(--void), var(--base));
+  min-height:100vh;padding:34px;
+  transition:background .3s ease, color .3s ease;
+}
+.container{
+  max-width:980px;margin:0 auto;
+  background:linear-gradient(165deg, var(--surface), var(--surface-2));
+  padding:44px 50px;border-radius:22px;border:1px solid var(--line);
+  box-shadow:var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:8px;}
+.header-left{display:flex;align-items:center;gap:16px;}
+.brand-icon-wrap{
+  width:52px;height:52px;border-radius:50%;background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;flex-shrink:0;
+}
+.brand-icon{
+  width:100%;height:100%;object-fit:contain;display:block;
+  /* Same as login page: multiply in light mode */
+  mix-blend-mode:multiply;
+}
+[data-theme="dark"] .brand-icon{
+  mix-blend-mode:normal;
+}
+h1{font-family:'Fraunces',serif;font-size:27px;font-weight:600;letter-spacing:-0.3px;}
+h1 span{color:var(--maroon-400);font-style:italic;}
+.theme-toggle{
+  padding:9px 16px;border:1.5px solid var(--line);border-radius:10px;background:var(--base);
+  color:var(--white);font-weight:600;font-size:13.5px;cursor:pointer;font-family:inherit;
+  transition:all .2s ease;white-space:nowrap;
+}
+.theme-toggle:hover{border-color:var(--maroon-500);}
+.subtitle{color:var(--grey-500);font-size:15px;padding-left:68px;margin:-4px 0 26px;}
+.note{
+  background:rgba(201,162,39,0.10);border:1px solid rgba(201,162,39,0.35);color:#8a6d1f;
+  padding:14px 18px;border-radius:12px;font-size:14px;line-height:1.6;margin-bottom:30px;
+}
+[data-theme="dark"] .note{color:#f0c33d;background:rgba(240,195,61,0.08);}
+.total-banner{
+  background:radial-gradient(circle at 50% 0%, var(--surface-3), var(--base) 75%);
+  border:1px solid var(--line);padding:26px;border-radius:16px;text-align:center;margin-bottom:34px;
+}
+.total-banner .num{font-family:'IBM Plex Mono',monospace;font-size:44px;font-weight:600;color:var(--maroon-500);}
+.total-banner .lbl{font-size:14px;color:var(--grey-300);margin-top:4px;}
+
+.category{
+  border:1px solid var(--line);border-radius:16px;padding:26px 28px;margin-bottom:20px;
+  background:var(--surface-3);
+}
+.cat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.cat-head h2{font-family:'Fraunces',serif;font-size:19px;font-weight:600;}
+.cat-head .max{
+  font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#fff;
+  background:linear-gradient(135deg,var(--maroon-500),var(--maroon-700));
+  padding:5px 14px;border-radius:20px;
+}
+.cat-desc{color:var(--grey-300);font-size:14.5px;line-height:1.65;margin-bottom:14px;}
+.formula-box{
+  background:var(--base);border:1px dashed var(--line);border-radius:10px;
+  padding:14px 16px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--maroon-500);
+  line-height:1.8;overflow-x:auto;white-space:pre;
+}
+.subfield-list{margin-top:12px;padding-left:18px;color:var(--grey-300);font-size:14px;line-height:1.9;}
+
+.ratings-table{width:100%;border-collapse:collapse;margin-top:10px;}
+.ratings-table th,.ratings-table td{
+  padding:11px 14px;text-align:left;font-size:14.5px;border-bottom:1px solid var(--line);
+}
+.ratings-table th{color:var(--grey-500);font-size:12px;text-transform:uppercase;letter-spacing:0.5px;}
+.pill{padding:4px 12px;border-radius:20px;font-weight:700;font-size:13px;display:inline-block;}
+.p-Excellent{background:rgba(46,125,91,0.12);color:#1f8c5f;}
+.p-Good{background:rgba(76,154,114,0.12);color:#3d7d5c;}
+.p-Watchlist{background:rgba(201,162,39,0.14);color:#8a6d1f;}
+.p-Risky{background:rgba(181,101,29,0.14);color:#8a4c15;}
+.p-Critical{background:rgba(139,30,45,0.10);color:var(--maroon-500);}
+
+.penalty-note{
+  background:rgba(165,46,63,0.06);border-left:4px solid var(--maroon-500);
+  padding:16px 20px;border-radius:12px;margin-top:10px;font-size:14.5px;color:var(--grey-300);line-height:1.8;
+}
+.back-link{display:block;margin-top:30px;color:var(--grey-300);text-decoration:none;font-size:14.5px;text-align:center;}
+.back-link:hover{color:var(--maroon-400);}
+
+@media(max-width:768px){
+  .container{padding:26px 20px;}
+  .subtitle{padding-left:0;}
+  .header{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-left">
+      <div class="brand-icon-wrap"><img src="/static/logo.png" alt="RAACK" class="brand-icon"></div>
+      <h1>Scoring <span>Formula</span></h1>
+    </div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+  </div>
+  <p class="subtitle">How every branch's monthly score is calculated — RAACK Scorify</p>
+
+  <div class="note">
+    ⚠️ This page explains the scoring logic based on the fields collected in the IT Form and the category
+    weightages used across the dashboards. If your backend's exact formulas differ, share <code>scoring.py</code>
+    and this page can be updated to match it precisely.
+  </div>
+
+  <div class="total-banner">
+    <div class="num">900</div>
+    <div class="lbl">Maximum possible Final Score, made up of 6 weighted categories minus penalties</div>
+  </div>
+
+  <div class="category">
+    <div class="cat-head"><h2>💰 Financial Health</h2><span class="max">Max 225</span></div>
+    <p class="cat-desc">Measures whether the branch is hitting its revenue targets, collecting fees on time, keeping operating margin healthy, and staying current on its dues (uniforms, salaries, hotel, merchandise).</p>
+    <div class="formula-box">Revenue Achievement % = Actual Revenue / Revenue Target
+Payment Discipline % = Average of (Paid / Due) across T-shirt, Salary, Hotel, Merchandise
+Financial Health = weighted blend of:
+  • Revenue Achievement %
+  • Fee Collection Rate %
+  • Operating Margin %
+  • Payment Discipline %
+  → scaled to 225 points</div>
+  </div>
+
+  <div class="category">
+    <div class="cat-head"><h2>📈 Student Growth & Retention</h2><span class="max">Max 225</span></div>
+    <p class="cat-desc">Tracks new admissions against target, dropout control, batch utilization, and how well trial classes convert into paying students.</p>
+    <div class="formula-box">Admission Achievement % = New Enrollments / New Student Target
+Retention % = (Closing Students) / (Opening Students + New Enrollments)
+Trial Conversion % = Trial Conversions / Trials Conducted
+Student Growth = weighted blend of:
+  • Admission Achievement %
+  • Retention %
+  • Batch Utilization %
+  • Trial Conversion %
+  → scaled to 225 points</div>
+  </div>
+
+  <div class="category">
+    <div class="cat-head"><h2>📋 Operations Discipline</h2><span class="max">Max 135</span></div>
+    <p class="cat-desc">How reliably the branch runs its planned classes and follows day-to-day operating processes.</p>
+    <div class="formula-box">Class Delivery % = Classes Conducted / Classes Planned
+Operations Discipline = weighted blend of:
+  • Class Delivery %
+  • Trainer Attendance %
+  • Attendance Recording Compliance %
+  • CRM/App Usage %
+  • Report Submission Compliance %
+  → scaled to 135 points</div>
+  </div>
+
+  <div class="category">
+    <div class="cat-head"><h2>⭐ Brand & Quality Compliance</h2><span class="max">Max 70</span></div>
+    <p class="cat-desc">Studio hygiene, curriculum adherence, trainer certification, branding/signage standards, and mystery-audit results.</p>
+    <div class="formula-box">Brand & Quality = average of:
+  • Hygiene Score %
+  • Curriculum Compliance %
+  • Trainer Certification %
+  • Branding Compliance %
+  • Mystery Audit Score %
+  → scaled to 70 points</div>
+  </div>
+
+  <div class="category">
+    <div class="cat-head"><h2>😊 Customer Experience</h2><span class="max">Max 70</span></div>
+    <p class="cat-desc">Parent/student satisfaction, Google rating, complaint resolution rate, referrals, and event satisfaction.</p>
+    <div class="formula-box">Complaint Resolution % = Complaints Resolved / Complaints Received
+Customer Experience = weighted blend of:
+  • Satisfaction Score %
+  • Google Rating (normalized out of 5)
+  • Complaint Resolution %
+  • Referrals (normalized)
+  • Event Satisfaction %
+  → scaled to 70 points</div>
+  </div>
+
+  <div class="category">
+    <div class="cat-head"><h2>📢 Local Marketing & Community Growth</h2><span class="max">Max 175</span></div>
+    <p class="cat-desc">Volume of local marketing activity — partnerships, approved social posts, and events/workshops/camps run in the month.</p>
+    <div class="formula-box">Local Marketing = weighted blend of:
+  • Marketing Activities Completed
+  • Partnerships Activated
+  • Approved Social Media Posts
+  • Events/Workshops/Camps Conducted
+  → scaled to 175 points (each capped at its own target/benchmark)</div>
+  </div>
+
+  <div class="category">
+    <div class="cat-head"><h2>⚠️ Penalty Flags</h2><span class="max">Deductions</span></div>
+    <p class="cat-desc">Certain risk flags reduce the Base Score directly, regardless of category performance.</p>
+    <div class="penalty-note">
+      • <strong>Unauthorized Pricing Discount</strong> — flat penalty deduction<br>
+      • <strong>False Reporting Detected</strong> — flat penalty deduction (higher severity)<br>
+      • <strong>Trainer Misconduct Issue</strong> — flat penalty deduction<br><br>
+      <strong>Final Score = Base Score (sum of 6 categories) − Total Penalty</strong>, floored at 0.
+    </div>
+  </div>
+
+  <div class="category">
+    <div class="cat-head"><h2>🚦 Rating Bands</h2></div>
+    <p class="cat-desc">The Final Score (out of 900) maps to a rating and a recommended action:</p>
+    <table class="ratings-table">
+      <thead><tr><th>Final Score</th><th>Rating</th><th>Typical Action</th></tr></thead>
+      <tbody>
+        <tr><td>720 – 900</td><td><span class="pill p-Excellent">Excellent</span></td><td>Recognize / model branch for others</td></tr>
+        <tr><td>630 – 719</td><td><span class="pill p-Good">Good</span></td><td>Maintain, minor coaching</td></tr>
+        <tr><td>495 – 629</td><td><span class="pill p-Watchlist">Watchlist</span></td><td>Monthly check-in, targeted support</td></tr>
+        <tr><td>360 – 494</td><td><span class="pill p-Risky">Risky</span></td><td>Formal improvement plan</td></tr>
+        <tr><td>Below 360</td><td><span class="pill p-Critical">Critical</span></td><td>Escalation / franchise review</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+</div>
+
+<script>
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  const btn = document.getElementById('themeToggle');
+  if(btn) btn.textContent = t === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+}
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('raack_theme', next);
+  applyTheme(next);
+}
+applyTheme(localStorage.getItem('raack_theme') || 'light');
+</script>
+</body>
+</html>

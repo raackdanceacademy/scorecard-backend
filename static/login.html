@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | RAACK Scorify</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --raack-red: #e3182f;
+            --raack-red-rgb: 227, 24, 47;
+            --raack-red-dark: #b80f24;
+            --raack-red-deep: #8f0d1d;
+            --raack-red-light: #ff4053;
+
+            --void: #f4f2f1;
+            --black: #ffffff;
+            --black-2: #f7f5f4;
+            --black-3: #f0eeec;
+
+            --grey: #6a6266;
+            --grey-light: #8a8286;
+
+            --text: #1c1a1b;
+            --text-dim: #4a4448;
+
+            --border: rgba(0, 0, 0, 0.08);
+
+            --shadow: 0 25px 60px rgba(0, 0, 0, 0.10);
+        }
+
+        [data-theme="dark"] {
+            --void: #070707;
+            --black: #070707;
+            --black-2: #0d0d0d;
+            --black-3: #131313;
+
+            --grey: #777;
+            --grey-light: #aaa;
+
+            --text: #ffffff;
+            --text-dim: #cfc6c8;
+
+            --border: rgba(255, 255, 255, 0.08);
+
+            --shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+        }
+
+        /* =====================================
+           PAGE FIT (desktop) — no scrolling
+        ===================================== */
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* =====================================
+           BODY
+        ===================================== */
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 15% 20%, rgba(var(--raack-red-rgb), 0.14), transparent 32%),
+                radial-gradient(circle at 85% 80%, rgba(var(--raack-red-rgb), 0.10), transparent 35%),
+                var(--void);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+            transition: background .3s ease, color .3s ease;
+        }
+
+        /* =====================================
+           PAGE — height capped to viewport (desktop)
+        ===================================== */
+        .login-page {
+            width: 100%;
+            max-width: 1100px;
+            height: min(650px, calc(100vh - 50px));
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            overflow: hidden;
+            background: var(--black-2);
+            box-shadow: var(--shadow);
+        }
+
+        /* =====================================
+           LEFT PANEL
+        ===================================== */
+        .login-info {
+            position: relative;
+            padding: 55px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background:
+                linear-gradient(145deg, rgba(var(--raack-red-rgb), 0.18), var(--black) 65%);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+        }
+
+        .login-info::before {
+            content: "";
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: rgba(var(--raack-red-rgb), 0.10);
+            filter: blur(60px);
+            top: -120px;
+            left: -100px;
+        }
+
+        .info-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* =====================================
+           TOP ROW (brand + theme toggle)
+        ===================================== */
+        .top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .theme-toggle {
+            padding: 9px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--black-3);
+            color: var(--text);
+            font-weight: 600;
+            font-size: 12.5px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .2s ease;
+            white-space: nowrap;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--raack-red);
+        }
+
+        /* =====================================
+           BRAND — round logo, transparent background
+        ===================================== */
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-img-wrap {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        .brand img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            mix-blend-mode: multiply;
+        }
+
+        [data-theme="dark"] .brand img {
+            mix-blend-mode: normal;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .brand-name {
+            font-size: 23px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .brand-name span {
+            color: var(--raack-red);
+        }
+
+        .brand-sub {
+            color: var(--grey);
+            font-size: 10.5px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* =====================================
+           INFO CONTENT
+        ===================================== */
+        .info-main {
+            margin-top: 70px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            color: var(--raack-red);
+            background: rgba(var(--raack-red-rgb), 0.10);
+            border: 1px solid rgba(var(--raack-red-rgb), 0.25);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 22px;
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--raack-red);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(var(--raack-red-rgb), .8);
+        }
+
+        .info-main h1 {
+            font-size: 44px;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        .info-main h1 span {
+            color: var(--raack-red);
+        }
+
+        .info-main p {
+            color: var(--grey);
+            font-size: 15px;
+            line-height: 1.8;
+            max-width: 410px;
+        }
+
+        /* =====================================
+           RIGHT LOGIN
+        ===================================== */
+        .login-panel {
+            padding: 55px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: var(--black);
+            overflow-y: auto;
+        }
+
+        .login-header {
+            margin-bottom: 35px;
+        }
+
+        .login-header h2 {
+            font-size: 31px;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .login-header p {
+            color: var(--grey);
+            font-size: 14.5px;
+            line-height: 1.6;
+        }
+
+        /* =====================================
+           FORM
+        ===================================== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-bottom: 9px;
+            letter-spacing: .3px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--grey-light);
+            font-size: 15px;
+            pointer-events: none;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 50px;
+            padding: 0 45px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            background: var(--black-3);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14.5px;
+            outline: none;
+            transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+        }
+
+        .form-input::placeholder {
+            color: var(--grey-light);
+        }
+
+        .form-input:focus {
+            background: var(--black-2);
+            border-color: rgba(var(--raack-red-rgb), 0.8);
+            box-shadow: 0 0 0 4px rgba(var(--raack-red-rgb), 0.10);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: var(--grey-light);
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .password-toggle:hover {
+            color: var(--raack-red);
+        }
+
+        /* =====================================
+           OPTIONS
+        ===================================== */
+        .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 4px 0 24px;
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--grey);
+            font-size: 12.5px;
+            cursor: pointer;
+        }
+
+        .remember input {
+            accent-color: var(--raack-red);
+        }
+
+        /* =====================================
+           LOGIN BUTTON
+        ===================================== */
+        .login-btn {
+            width: 100%;
+            height: 52px;
+            border: none;
+            border-radius: 11px;
+            background: var(--raack-red);
+            color: white;
+            font-family: inherit;
+            font-size: 14.5px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 12px 30px rgba(var(--raack-red-rgb), 0.32);
+            transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+        }
+
+        .login-btn:hover {
+            background: var(--raack-red-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 18px 40px rgba(var(--raack-red-rgb), 0.42);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn.loading {
+            opacity: .7;
+            pointer-events: none;
+        }
+
+        /* =====================================
+           ERROR
+        ===================================== */
+        .error-message {
+            display: none;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            border-radius: 9px;
+            background: rgba(var(--raack-red-rgb), 0.10);
+            border: 1px solid rgba(var(--raack-red-rgb), 0.25);
+            color: var(--raack-red-dark);
+            font-size: 12.5px;
+            line-height: 1.5;
+        }
+
+        [data-theme="dark"] .error-message {
+            color: #ff8b96;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* =====================================
+           BACK
+        ===================================== */
+        .back-home {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: var(--grey);
+            text-decoration: none;
+            font-size: 12.5px;
+            transition: color .2s ease;
+        }
+
+        .back-home:hover {
+            color: var(--raack-red);
+        }
+
+        /* =====================================
+           RESPONSIVE — TABLET
+           Stacked layout, content-sized height,
+           whole page allowed to scroll instead
+           of the two panels overlapping.
+        ===================================== */
+        @media (max-width: 850px) {
+
+            html,
+            body {
+                height: auto;
+                min-height: 100%;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            body {
+                align-items: flex-start;
+                padding: 20px 16px;
+            }
+
+            .login-page {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+                max-width: 520px;
+                height: auto;
+                margin: 0 auto;
+            }
+
+            .login-info {
+                min-height: 0;
+                padding: 32px 28px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                overflow-y: visible;
+            }
+
+            .info-main {
+                margin-top: 26px;
+            }
+
+            .info-main h1 {
+                font-size: 30px;
+            }
+
+            .login-panel {
+                padding: 32px 28px;
+                overflow-y: visible;
+            }
+        }
+
+        /* =====================================
+           RESPONSIVE — SMALL MOBILE
+        ===================================== */
+        @media (max-width: 500px) {
+
+            body {
+                padding: 14px 10px;
+            }
+
+            .login-page {
+                border-radius: 18px;
+            }
+
+            .login-info {
+                padding: 24px 22px;
+            }
+
+            .login-panel {
+                padding: 26px 22px;
+            }
+
+            .info-main {
+                margin-top: 20px;
+            }
+
+            .info-main h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-page">
+        <!-- =====================================
+             LEFT INFORMATION PANEL
+        ===================================== -->
+        <section class="login-info">
+            <div class="info-content">
+                <!-- TOP ROW -->
+                <div class="top-row">
+                    <!-- BRAND -->
+                    <div class="brand">
+                        <div class="brand-img-wrap">
+                            <img src="/static/logo.png" alt="RAACK Academy">
+                        </div>
+                        <div class="brand-text">
+                            <div class="brand-name">
+                                RAACK
+                                <span></span>
+                            </div>
+                            <div class="brand-sub">
+                                Academy of Dance
+                            </div>
+                        </div>
+                    </div>
+                    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+                        🌙 Dark
+                    </button>
+                </div>
+
+                <!-- INTRO -->
+                <div class="info-main">
+                    <div class="eyebrow">
+                        Franchise Performance Platform
+                    </div>
+                    <h1>
+                        Manage your
+                        <span>performance</span>
+                        smarter
+                    </h1>
+                    <p>
+                        One centralized platform to
+                        evaluate Raack franchise performance,
+                        monitor scores and understand
+                        branch-level business health.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================
+             LOGIN PANEL
+        ===================================== -->
+        <section class="login-panel">
+            <div class="login-header">
+                <h2>
+                    Welcome back
+                </h2>
+                <p>
+                    Sign in to access RAACK Scorify.
+                </p>
+            </div>
+
+            <!-- ERROR -->
+            <div id="errorMessage" class="error-message"></div>
+
+            <!-- FORM -->
+            <form id="loginForm" autocomplete="off">
+                <!-- USERNAME -->
+                <div class="form-group">
+                    <label for="username">
+                        Username
+                    </label>
+                    <div class="input-wrapper">
+                        <i class="input-icon" id="userIcon">
+                            👤
+                        </i>
+                        <input
+                            type="text"
+                            id="username"
+                            class="form-input"
+                            placeholder="Enter your username"
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="form-group">
+                    <label for="password">
+                        Password
+                    </label>
+                    <div class="input-wrapper">
+                        <i class="input-icon">
+                            🔒
+                        </i>
+                        <input
+                            type="password"
+                            id="password"
+                            class="form-input"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            id="passwordToggle"
+                            aria-label="Show password"
+                        >
+                            👁
+                        </button>
+                    </div>
+                </div>
+
+                <!-- OPTIONS -->
+                <div class="form-options">
+                    <label class="remember">
+                        <input
+                            type="checkbox"
+                            id="rememberMe"
+                        >
+                        Remember me
+                    </label>
+                </div>
+
+                <!-- LOGIN -->
+                <button
+                    type="submit"
+                    class="login-btn"
+                    id="loginButton"
+                >
+                    <span id="loginButtonText">
+                        Sign In
+                    </span>
+                </button>
+            </form>
+
+            <!-- FIXED: BACK LINK -->
+            <a href="/" class="back-home">
+                ← Back to RAACK Scorify
+            </a>
+        </section>
+    </div>
+
+    <script>
+        /* =====================================
+           THEME
+        ===================================== */
+        function applyTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+            const btn = document.getElementById('themeToggle');
+            if (btn) btn.textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('raack_theme', next);
+            applyTheme(next);
+        }
+
+        applyTheme(localStorage.getItem('raack_theme') || 'light');
+
+        /* =====================================
+           SUCCESS SOUND (Web Audio API — no file needed)
+           Plays a short, pleasant two-note chime.
+        ===================================== */
+        function playLoginSuccessSound() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioCtx();
+
+                const now = ctx.currentTime;
+
+                // Two quick ascending notes (a friendly "ding-ding")
+                const notes = [
+                    { freq: 880,  start: 0,    dur: 0.16 }, // A5
+                    { freq: 1318.5, start: 0.14, dur: 0.28 } // E6
+                ];
+
+                notes.forEach(n => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc.type = "sine";
+                    osc.frequency.value = n.freq;
+
+                    const startTime = now + n.start;
+                    const endTime = startTime + n.dur;
+
+                    // Smooth attack/decay envelope so it doesn't click or pop
+                    gain.gain.setValueAtTime(0, startTime);
+                    gain.gain.linearRampToValueAtTime(0.25, startTime + 0.015);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, endTime);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(startTime);
+                    osc.stop(endTime + 0.02);
+                });
+
+                // Close the context a bit after the sound finishes to free resources
+                setTimeout(() => {
+                    if (ctx.state !== "closed") ctx.close();
+                }, 700);
+            } catch (e) {
+                // Audio isn't critical to login — fail silently if unsupported/blocked
+                console.warn("Login sound could not be played:", e);
+            }
+        }
+
+        /* =====================================
+           PASSWORD SHOW / HIDE
+        ===================================== */
+        const passwordInput =
+            document.getElementById("password");
+
+        const passwordToggle =
+            document.getElementById("passwordToggle");
+
+        passwordToggle.addEventListener(
+            "click",
+            function() {
+                const isPassword =
+                    passwordInput.type === "password";
+
+                passwordInput.type =
+                    isPassword ?
+                    "text" :
+                    "password";
+
+                passwordToggle.textContent =
+                    isPassword ?
+                    "🙈" :
+                    "👁";
+            }
+        );
+
+        /* =====================================
+           ERROR MESSAGE
+        ===================================== */
+        function showError(message) {
+            const error =
+                document.getElementById(
+                    "errorMessage"
+                );
+            error.textContent = message;
+            error.classList.add("show");
+        }
+
+        function hideError() {
+            document
+                .getElementById("errorMessage")
+                .classList.remove("show");
+        }
+
+        /* =====================================
+           LOGIN
+        ===================================== */
+        document
+            .getElementById("loginForm")
+            .addEventListener(
+                "submit",
+                async function(event) {
+                    event.preventDefault();
+                    hideError();
+
+                    const username =
+                        document
+                        .getElementById("username")
+                        .value
+                        .trim();
+
+                    const password =
+                        document
+                        .getElementById("password")
+                        .value;
+
+                    const button =
+                        document
+                        .getElementById("loginButton");
+
+                    const buttonText =
+                        document
+                        .getElementById(
+                            "loginButtonText"
+                        );
+
+                    if (!username || !password) {
+                        showError(
+                            "Please enter both username and password."
+                        );
+                        return;
+                    }
+
+                    button.classList.add("loading");
+                    buttonText.textContent =
+                        "Signing in...";
+
+                    try {
+                        const response =
+                            await fetch(
+                                "/api/login", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type":
+                                            "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        username: username,
+                                        password: password
+                                    })
+                                }
+                            );
+
+                        const data =
+                            await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(
+                                data.detail ||
+                                "Invalid username or password."
+                            );
+                        }
+
+                        if (data.access_token) {
+                            localStorage.setItem(
+                                "raack_token",
+                                data.access_token
+                            );
+                        }
+
+                        if (data.role) {
+                            localStorage.setItem(
+                                "raack_role",
+                                data.role
+                            );
+                        }
+
+                        if (data.username) {
+                            localStorage.setItem(
+                                "raack_username",
+                                data.username
+                            );
+                        }
+
+                        // 🔊 Play a success chime, then give it a brief
+                        // moment to be heard before navigating away.
+                        buttonText.textContent = "Success!";
+                        playLoginSuccessSound();
+
+                        setTimeout(() => {
+                            window.location.href =
+                                data.redirect ||
+                                "/dashboard";
+                        }, 500);
+
+                    } catch (error) {
+                        showError(
+                            error.message ||
+                            "Login failed. Please try again."
+                        );
+                        button.classList.remove(
+                            "loading"
+                        );
+                        buttonText.textContent =
+                            "Sign In";
+                    }
+                }
+            );
+
+        /* =====================================
+           REMOVE ERROR WHEN USER TYPES
+        ===================================== */
+        document
+            .getElementById("username")
+            .addEventListener(
+                "input",
+                hideError
+            );
+
+        document
+            .getElementById("password")
+            .addEventListener(
+                "input",
+                hideError
+            );
+    </script>
+</body>
+
+</html>

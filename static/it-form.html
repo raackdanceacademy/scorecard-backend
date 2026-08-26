@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT Form — RAACK Scorify</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --void: #f4f2f1;
+      --base: #ffffff;
+      --surface: #ffffff;
+      --surface-2: #f7f5f4;
+      --surface-3: #efece9;
+      --line: #e1dcd8;
+      --line-soft: rgba(0, 0, 0, 0.06);
+      --red-900: #7a0f1a;
+      --red-700: #b31b2c;
+      --red-600: #d41f33;
+      --red-500: #E3182F;
+      --red-400: #e84a5c;
+      --red-300: #f06c7a;
+      --grey-300: #55494c;
+      --grey-500: #8a8286;
+      --white: #1c1a1b;
+      --white-dim: #4a4448;
+      --shadow-lg: 0 24px 50px -20px rgba(0, 0, 0, 0.14), 0 8px 18px -10px rgba(0, 0, 0, 0.08);
+      --shadow-sm: 0 10px 22px -14px rgba(0, 0, 0, 0.10);
+      color-scheme: light;
+    }
+
+    [data-theme="dark"] {
+      --void: #0a0809;
+      --base: #121012;
+      --surface: #181516;
+      --surface-2: #201b1d;
+      --surface-3: #241f21;
+      --line: #2c262a;
+      --line-soft: rgba(255, 255, 255, 0.06);
+      --grey-300: #9d9599;
+      --grey-500: #736b6f;
+      --white: #f7f2f0;
+      --white-dim: #cfc6c8;
+      --shadow-lg: 0 30px 60px -20px rgba(0, 0, 0, 0.65), 0 10px 24px -10px rgba(0, 0, 0, 0.5);
+      --shadow-sm: 0 10px 24px -12px rgba(0, 0, 0, 0.55);
+      color-scheme: dark;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14.5px;
+      background: radial-gradient(ellipse 800px 500px at 10% 0%, rgba(227, 24, 47, 0.14), transparent 55%), radial-gradient(ellipse 700px 500px at 90% 100%, rgba(179, 27, 44, 0.10), transparent 55%), linear-gradient(180deg, var(--void), var(--base));
+      color: var(--white);
+      min-height: 100vh;
+      padding: 34px;
+      transition: background .3s ease, color .3s ease;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: linear-gradient(165deg, var(--surface), var(--surface-2));
+      padding: 36px 42px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    h1 span {
+      color: var(--red-400);
+      font-style: italic;
+    }
+
+    .theme-toggle,
+    .missing-btn {
+      padding: 8px 14px;
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      background: var(--base);
+      color: var(--white);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .2s ease;
+      white-space: nowrap;
+    }
+
+    .theme-toggle:hover,
+    .missing-btn:hover {
+      border-color: var(--red-500);
+    }
+
+    .subtitle {
+      color: var(--grey-500);
+      font-size: 13.5px;
+      margin: -4px 0 22px;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      color: var(--grey-300);
+      font-weight: 700;
+      margin-bottom: 4px;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    label .required {
+      color: var(--red-400);
+    }
+
+    select,
+    input {
+      width: 100%;
+      padding: 8px 11px;
+      background: var(--base);
+      border: 1.5px solid var(--line);
+      border-radius: 9px;
+      font-size: 13.5px;
+      color: var(--white);
+      font-family: inherit;
+      transition: all .15s ease;
+      height: 36px;
+    }
+
+    input[type="text"] {
+      height: 36px;
+    }
+
+    select:focus,
+    input:focus {
+      outline: none;
+      border-color: var(--red-500);
+      background: var(--surface-3);
+      box-shadow: 0 0 0 3px rgba(227, 24, 47, 0.13);
+    }
+
+    input::placeholder {
+      color: var(--grey-500);
+    }
+
+    input.field-invalid {
+      border-color: var(--red-500);
+      box-shadow: 0 0 0 3px rgba(227, 24, 47, 0.18);
+    }
+
+    .field-warning {
+      font-size: 10.5px;
+      color: var(--red-500);
+      margin-top: 3px;
+      display: none;
+    }
+
+    .field-warning.show {
+      display: block;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px 14px;
+    }
+
+    .top-row {
+      grid-template-columns: 1fr 1fr;
+      margin-bottom: 22px;
+    }
+
+    .section {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      margin-bottom: 10px;
+      background: var(--surface-2);
+      overflow: hidden;
+    }
+
+    .section[open] {
+      background: var(--surface);
+    }
+
+    .section summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 13px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-family: 'Fraunces', serif;
+      font-size: 15.5px;
+      font-weight: 600;
+      user-select: none;
+    }
+
+    .section summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .section summary .s-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .section summary .chev {
+      font-size: 12px;
+      color: var(--grey-500);
+      transition: transform .2s ease;
+    }
+
+    .section[open] summary .chev {
+      transform: rotate(90deg);
+    }
+
+    .section summary .badge {
+      font-size: 11px;
+      background: var(--red-600);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .section .section-body {
+      padding: 4px 18px 16px;
+    }
+
+    .section summary:hover {
+      background: var(--surface-3);
+    }
+
+    .help-text {
+      font-size: 11px;
+      color: var(--grey-500);
+      margin-top: 3px;
+    }
+
+    .penalty-section {
+      background: var(--surface-3);
+      padding: 16px 18px;
+      border-radius: 12px;
+      border-left: 4px solid var(--red-500);
+      margin: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .form-actions {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .form-actions button {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 13px 12px;
+      font-family: inherit;
+      font-size: 14.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+
+    .form-actions button:hover {
+      transform: translateY(-2px);
+    }
+
+    .form-actions button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .submit-btn {
+      background: var(--red-500);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .submit-btn:hover {
+      background: var(--red-600);
+      box-shadow: 0 20px 40px -16px rgba(227, 24, 47, 0.4), var(--shadow-sm);
+    }
+
+    .clear-btn {
+      background: var(--surface-3);
+      color: var(--white-dim);
+      border: 1px solid var(--line) !important;
+    }
+
+    .clear-btn:hover {
+      background: var(--surface-2);
+    }
+
+    .edit-btn {
+      background: rgba(227, 24, 47, 0.10);
+      color: var(--red-500);
+      border: 1px solid rgba(227, 24, 47, 0.3) !important;
+    }
+
+    .edit-btn:hover {
+      background: rgba(227, 24, 47, 0.16);
+    }
+
+    [data-theme="dark"] .edit-btn {
+      background: #302329;
+      color: #e5b4bc;
+      border: 1px solid #57313a !important;
+    }
+
+    [data-theme="dark"] .edit-btn:hover {
+      background: #3b2930;
+    }
+
+    [data-theme="dark"] .clear-btn {
+      background: #292326;
+      color: #ddd;
+      border: 1px solid #3a3034 !important;
+    }
+
+    [data-theme="dark"] .clear-btn:hover {
+      background: #342d30;
+    }
+
+    body.editing .submit-btn {
+      background: var(--red-700);
+    }
+
+    .edit-status {
+      display: none;
+      background: linear-gradient(135deg, rgba(227, 24, 47, .10), rgba(179, 27, 44, .06));
+      color: var(--red-500);
+      border: 1px solid rgba(232, 74, 92, .30);
+      padding: 11px 15px;
+      border-radius: 11px;
+      margin-bottom: 16px;
+      font-size: 13.5px;
+      text-align: center;
+    }
+
+    .edit-status.show {
+      display: block;
+    }
+
+    .success-msg,
+    .error-msg {
+      padding: 12px 16px;
+      border-radius: 11px;
+      margin-bottom: 18px;
+      display: none;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .success-msg {
+      background: rgba(61, 220, 151, 0.10);
+      color: #1f8c5f;
+      border-left: 4px solid #3ddc97;
+    }
+
+    .error-msg {
+      background: rgba(227, 24, 47, 0.08);
+      color: var(--red-500);
+      border-left: 4px solid var(--red-400);
+    }
+
+    [data-theme="dark"] .success-msg {
+      background: #0f2a1c;
+      color: #3ddc97;
+    }
+
+    [data-theme="dark"] .error-msg {
+      background: #2a0f14;
+      color: var(--red-400);
+    }
+
+    .success-msg.show,
+    .error-msg.show {
+      display: block;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+
+    input[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--red-600);
+      border-radius: 4px;
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 22px;
+      color: var(--grey-300);
+      text-decoration: none;
+      font-size: 13.5px;
+      text-align: center;
+    }
+
+    .back-link:hover {
+      color: var(--red-400);
+    }
+
+    .formula-link {
+      display: block;
+      text-align: center;
+      margin-top: 6px;
+      color: var(--grey-500);
+      text-decoration: none;
+      font-size: 12.5px;
+    }
+
+    .formula-link:hover {
+      color: var(--red-400);
+    }
+
+    .records-section {
+      margin-top: 38px;
+      padding-top: 26px;
+      border-top: 1px solid var(--line);
+    }
+
+    .records-section h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .records-section h2 .badge {
+      font-size: 11.5px;
+      background: var(--surface-3);
+      color: var(--grey-300);
+      padding: 4px 11px;
+      border-radius: 10px;
+      font-weight: 700;
+      border: 1px solid var(--line);
+    }
+
+    .records-hint {
+      font-size: 12.5px;
+      color: var(--grey-500);
+      margin-bottom: 14px;
+    }
+
+    .filter-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 16px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      padding: 14px 16px;
+      border-radius: 13px;
+    }
+
+    .filter-bar .form-group {
+      margin-bottom: 0;
+    }
+
+    .filter-reset {
+      padding: 8px 14px;
+      border-radius: 9px;
+      border: 1px solid var(--line);
+      background: var(--base);
+      color: var(--grey-300);
+      font-weight: 700;
+      font-size: 12.5px;
+      cursor: pointer;
+      font-family: inherit;
+      height: 36px;
+      white-space: nowrap;
+    }
+
+    .filter-reset:hover {
+      border-color: var(--red-500);
+      color: var(--red-500);
+    }
+
+    .table-wrap {
+      max-height: 440px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    table.records-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    table.records-table thead th {
+      position: sticky;
+      top: 0;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--grey-500);
+      background: var(--surface-2);
+      padding: 10px 13px;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+      z-index: 1;
+    }
+
+    table.records-table tbody td {
+      padding: 10px 13px;
+      border-bottom: 1px solid var(--line-soft);
+      white-space: nowrap;
+      color: var(--white);
+    }
+
+    table.records-table tbody tr:hover {
+      background: var(--surface-3);
+    }
+
+    table.records-table th:first-child,
+    table.records-table td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: var(--surface-2);
+      width: 92px;
+      min-width: 92px;
+      box-shadow: 2px 0 6px -2px rgba(0, 0, 0, 0.10);
+    }
+
+    table.records-table tbody td:first-child {
+      background: var(--surface);
+    }
+
+    table.records-table th:nth-child(2),
+    table.records-table td:nth-child(2) {
+      position: sticky;
+      left: 92px;
+      z-index: 2;
+      background: var(--surface-2);
+      width: 40px;
+      min-width: 40px;
+      text-align: center;
+      box-shadow: 2px 0 6px -2px rgba(0, 0, 0, 0.10);
+    }
+
+    table.records-table tbody td:nth-child(2) {
+      background: var(--surface);
+    }
+
+    table.records-table td.row-num {
+      color: var(--grey-500);
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 600;
+    }
+
+    table.records-table th:nth-child(3),
+    table.records-table td:nth-child(3) {
+      position: sticky;
+      left: 132px;
+      z-index: 2;
+      background: var(--surface-2);
+      box-shadow: 2px 0 6px -2px rgba(0, 0, 0, 0.10);
+    }
+
+    table.records-table tbody td:nth-child(3) {
+      background: var(--surface);
+    }
+
+    table.records-table thead th:first-child,
+    table.records-table thead th:nth-child(2),
+    table.records-table thead th:nth-child(3) {
+      z-index: 3;
+    }
+
+    .row-edit-btn {
+      padding: 6px 14px;
+      border-radius: 9px;
+      border: 1px solid rgba(227, 24, 47, 0.3);
+      background: rgba(227, 24, 47, 0.10);
+      color: var(--red-500);
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .row-edit-btn:hover {
+      background: rgba(227, 24, 47, 0.18);
+    }
+
+    .records-empty {
+      padding: 26px;
+      text-align: center;
+      color: var(--grey-500);
+      font-size: 13.5px;
+    }
+
+    .detail-table td.k {
+      color: var(--grey-500);
+      font-weight: 600;
+      width: 46%;
+    }
+
+    .detail-table td.v {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .desktop-only {
+      display: block;
+    }
+
+    .mobile-only {
+      display: none;
+    }
+
+    .record-card {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 13px 15px;
+      margin-bottom: 10px;
+      background: var(--surface);
+    }
+
+    .record-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .record-card-head strong {
+      font-family: 'Fraunces', serif;
+      font-size: 15px;
+    }
+
+    .card-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .card-field {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 14px;
+      font-size: 12.5px;
+    }
+
+    .card-k {
+      color: var(--grey-500);
+      flex-shrink: 0;
+    }
+
+    .card-v {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 600;
+      text-align: right;
+      word-break: break-word;
+      color: var(--white);
+    }
+
+    .card-list-wrap {
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .missing-popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 20px;
+    }
+
+    .missing-popup {
+      max-width: 700px;
+      width: 100%;
+      max-height: 82vh;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 28px 32px;
+      box-shadow: var(--shadow-lg);
+      overflow-y: auto;
+    }
+
+    .missing-popup h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    .missing-popup .form-group {
+      max-width: 280px;
+      margin-bottom: 16px;
+    }
+
+    .missing-popup ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .missing-popup li {
+      padding: 6px 0;
+      border-bottom: 1px solid var(--line-soft);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .missing-popup li .missing-num {
+      color: var(--grey-500);
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 12px;
+      min-width: 26px;
+      text-align: right;
+    }
+
+    .missing-popup .close-btn {
+      margin-top: 20px;
+      background: var(--red-500);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-weight: 700;
+      cursor: pointer;
+      float: right;
+    }
+
+    .missing-popup .close-btn:hover {
+      background: var(--red-600);
+    }
+
+    .missing-empty {
+      color: var(--grey-500);
+      padding: 20px 0;
+    }
+
+    /* Confirmation popup */
+    .confirm-popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(3px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .confirm-popup {
+      max-width: 440px;
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 24px 28px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .confirm-popup h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+
+    .confirm-popup p {
+      font-size: 14.5px;
+      color: var(--grey-300);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .confirm-popup .popup-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .confirm-popup .popup-actions button {
+      padding: 9px 22px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .confirm-popup .popup-cancel {
+      background: var(--surface-3);
+      color: var(--white-dim);
+      border: 1px solid var(--line);
+    }
+
+    .confirm-popup .popup-cancel:hover {
+      background: var(--surface-2);
+    }
+
+    .confirm-popup .popup-confirm {
+      background: var(--red-500);
+      color: #fff;
+    }
+
+    .confirm-popup .popup-confirm:hover {
+      background: var(--red-600);
+    }
+
+    /* ---------- Nice, theme-aware native <select> (Yes/No dropdowns) ---------- */
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      cursor: pointer;
+      background-color: var(--base);
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a8286' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 13px;
+      padding-right: 34px;
+    }
+
+    [data-theme="dark"] select {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239d9599' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    }
+
+    select option {
+      background-color: var(--surface);
+      color: var(--white);
+    }
+
+    /* ---------- Custom combobox dropdown (branch / month fields) ---------- */
+    .combo-wrap {
+      position: relative;
+    }
+
+    .combo-wrap input {
+      padding-right: 34px;
+    }
+
+    .combo-wrap::after {
+      content: '';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      width: 11px;
+      height: 11px;
+      margin-top: -6px;
+      pointer-events: none;
+      background: no-repeat center/contain;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a8286' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    }
+
+    [data-theme="dark"] .combo-wrap::after {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239d9599' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    }
+
+    .combo-list {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 6px);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      padding: 6px;
+      max-height: 230px;
+      overflow-y: auto;
+      z-index: 80;
+      display: none;
+    }
+
+    .combo-list.show {
+      display: block;
+    }
+
+    .combo-option {
+      padding: 8px 11px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13.5px;
+      color: var(--white);
+    }
+
+    .combo-option.active,
+    .combo-option:hover {
+      background: var(--surface-3);
+      color: var(--red-500);
+    }
+
+    .combo-empty {
+      padding: 9px 11px;
+      color: var(--grey-500);
+      font-size: 12.5px;
+    }
+
+    /* ---------- Quarterly field disabled style ---------- */
+    input.field-quarterly-inactive {
+      opacity: 0.6;
+      background: var(--surface-3);
+      cursor: not-allowed;
+    }
+
+    .quarterly-help {
+      font-size: 10px;
+      color: var(--grey-500);
+      margin-top: 2px;
+      font-style: italic;
+    }
+
+    @media(max-width:680px) {
+      .desktop-only {
+        display: none;
+      }
+
+      .mobile-only {
+        display: block;
+      }
+    }
+
+    @media(max-width:900px) {
+      .form-actions {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .filter-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .filter-reset {
+        grid-column: 1/-1;
+      }
+    }
+
+    @media(max-width:768px) {
+      .top-row {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        padding: 24px 18px;
+      }
+
+      .header {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media(max-width:600px) {
+      body {
+        padding: 12px;
+      }
+
+      .container {
+        padding: 18px 14px;
+        border-radius: 16px;
+      }
+
+      .form-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      .theme-toggle {
+        padding: 7px 11px;
+        font-size: 12px;
+      }
+
+      .section summary {
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+
+      .section summary .badge {
+        font-size: 10px;
+        padding: 3px 8px;
+      }
+
+      .section .section-body {
+        padding: 2px 14px 14px;
+      }
+
+      .filter-bar {
+        grid-template-columns: 1fr;
+        padding: 12px 14px;
+      }
+
+      .filter-reset {
+        grid-column: auto;
+        width: 100%;
+      }
+
+      .records-section h2 {
+        font-size: 16px;
+      }
+
+      .record-card {
+        padding: 11px 13px;
+      }
+
+      .card-field {
+        font-size: 12px;
+      }
+    }
+
+    @media(max-width:420px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <h1>Score Card Submission <span>Form</span></h1>
+        <button class="missing-btn" id="missingBtn">📋 Pending Items</button>
+      </div>
+      <button class="theme-toggle" id="themeToggle" type="button" onclick="toggleTheme()">🌙 Dark Mode</button>
+    </div>
+    <p class="subtitle">Submit monthly performance data for the selected branch — RAACK Scorify</p>
+
+    <div id="editStatus" class="edit-status">✏️ Editing existing saved data</div>
+    <div id="successMsg" class="success-msg">✅ Form submitted successfully!</div>
+    <div id="errorMsg" class="error-msg">❌ Error submitting form. Please try again.</div>
+
+    <form id="itForm">
+      <div class="form-row top-row">
+        <div class="form-group">
+          <label>Branch <span class="required">*</span></label>
+          <div class="combo-wrap">
+            <input type="text" id="branch" placeholder="Type or select branch..." autocomplete="off" required>
+            <div class="combo-list" id="branchList"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Reporting Month <span class="required">*</span></label>
+          <input type="hidden" id="reportMonth" value="2026-08">
+          <div class="combo-wrap">
+            <input type="text" id="reportMonthDisplay" placeholder="Type or select month..." autocomplete="off"
+              required>
+            <div class="combo-list" id="reportMonthList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Health (unchanged) -->
+      <details class="section" open>
+        <summary><span class="s-left">💰 Financial Health <span class="badge">225 Points</span></span><span
+            class="chev">▶</span></summary>
+        <div class="section-body">
+          <div class="form-row">
+            <div class="form-group"><label>Revenue Target (INR)</label><input type="number" id="revenueTarget" value="0"
+                min="0" step="any"></div>
+            <div class="form-group"><label>Revenue Achieved (INR)</label><input type="number" id="revenueActual"
+                value="0" min="0" step="any"></div>
+            <div class="form-group"><label>T-shirt/Uniform Due (INR)</label><input type="number" id="tshirtDue"
+                value="0" min="0" step="any"></div>
+            <div class="form-group"><label>T-shirt/Uniform Paid (INR)</label><input type="number" id="tshirtPaid"
+                value="0" min="0" step="any">
+              <div class="field-warning" id="tshirtPaid-warn">Paid can't exceed Due — clamped.</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Instructor Salary Due (INR)</label><input type="number" id="salaryDue"
+                value="0" min="0" step="any"></div>
+            <div class="form-group"><label>Instructor Salary Paid (INR)</label><input type="number" id="salaryPaid"
+                value="0" min="0" step="any">
+              <div class="field-warning" id="salaryPaid-warn">Paid can't exceed Due — clamped.</div>
+            </div>
+            <div class="form-group"><label>Hotel/Accommodation Due (INR)</label><input type="number" id="hotelDue"
+                value="0" min="0" step="any"></div>
+            <div class="form-group"><label>Hotel/Accommodation Paid (INR)</label><input type="number" id="hotelPaid"
+                value="0" min="0" step="any">
+              <div class="field-warning" id="hotelPaid-warn">Paid can't exceed Due — clamped.</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Merchandise Due (INR)</label><input type="number" id="merchDue" value="0"
+                min="0" step="any"></div>
+            <div class="form-group"><label>Merchandise Paid (INR)</label><input type="number" id="merchPaid" value="0"
+                min="0" step="any">
+              <div class="field-warning" id="merchPaid-warn">Paid can't exceed Due — clamped.</div>
+            </div>
+            <div class="form-group"><label>Fee Collection (%)</label><input type="number" id="feeCollectionRate"
+                value="0" min="0" max="100" step="1"></div>
+            <div class="form-group"><label>Operating Margin (%)</label><input type="number" id="operatingMargin"
+                value="0" min="0" max="100" step="1"></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Student Growth: removed batchUtilization, trialsConducted, trialConversions -->
+      <details class="section">
+        <summary><span class="s-left">📈 Student Growth & Retention <span class="badge">225 Points</span></span><span
+            class="chev">▶</span></summary>
+        <div class="section-body">
+          <div class="form-row">
+            <div class="form-group"><label>Opening Students</label><input type="number" id="openingStudents" value="0"
+                min="0"></div>
+            <div class="form-group"><label>New Admission Target</label><input type="number" id="newStudentTarget"
+                value="0" min="0"></div>
+            <div class="form-group"><label>New Paid Admissions</label><input type="number" id="newEnrollments" value="0"
+                min="0"></div>
+            <div class="form-group"><label>Dropouts</label><input type="number" id="dropouts" value="0" min="0">
+              <div class="field-warning" id="dropouts-warn">Can't exceed Opening + New Admissions — clamped.</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Closing Students</label><input type="number" id="closingStudents" value="0"
+                min="0"></div>
+            <!-- removed batchUtilization, trialsConducted, trialConversions -->
+          </div>
+        </div>
+      </details>
+
+      <!-- Operations: removed classesPlanned, classesConducted, trainerAttendance -->
+      <details class="section">
+        <summary><span class="s-left">📋 Operations Discipline <span class="badge">135 Points</span></span><span
+            class="chev">▶</span></summary>
+        <div class="section-body">
+          <div class="form-row">
+            <div class="form-group"><label>Attendance Recording (%)</label><input type="number" id="attendanceRecording"
+                value="0" min="0" max="100" step="1"></div>
+            <div class="form-group"><label>CRM/App Usage (%)</label><input type="number" id="crmUsage" value="0" min="0"
+                max="100" step="1"></div>
+            <div class="form-group"><label>Report Submission (%)</label><input type="number" id="reportSubmission"
+                value="0" min="0" max="100" step="1"></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Brand & Quality: quarterly fields (Branding, Mystery Audit) -->
+      <details class="section">
+        <summary><span class="s-left">⭐ Brand & Quality Compliance <span class="badge">70 Points</span></span><span
+            class="chev">▶</span></summary>
+        <div class="section-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Branding/Signage (%)</label>
+              <input type="number" id="brandingCompliance" value="0" min="0" max="100" step="1">
+              <div class="quarterly-help">Quarterly – editable in Jun, Sep, Dec, Mar</div>
+            </div>
+            <div class="form-group">
+              <label>Audit/Mystery Visit (%)</label>
+              <input type="number" id="mysteryAuditScore" value="0" min="0" max="100" step="1">
+              <div class="quarterly-help">Quarterly – editable in Jun, Sep, Dec, Mar</div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Customer Experience: satisfaction_score is also quarterly (but we keep it here) -->
+      <details class="section">
+        <summary><span class="s-left">😊 Customer Experience <span class="badge">70 Points</span></span><span
+            class="chev">▶</span></summary>
+        <div class="section-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Satisfaction Score (%)</label>
+              <input type="number" id="satisfactionScore" value="0" min="0" max="100" step="1">
+              <div class="quarterly-help">Quarterly – editable in Jun, Sep, Dec, Mar</div>
+            </div>
+            <div class="form-group"><label>Google Rating (1–5)</label><input type="number" id="googleRating" value="1"
+                min="1" max="5" step="0.1">
+              <div class="field-warning" id="googleRating-warn">Must be between 1 and 5.</div>
+            </div>
+            <div class="form-group"><label>Complaints Received</label><input type="number" id="complaintsReceived"
+                value="0" min="0"></div>
+            <div class="form-group"><label>Complaints Resolved</label><input type="number" id="complaintsResolved"
+                value="0" min="0">
+              <div class="field-warning" id="complaintsResolved-warn">Can't exceed Complaints Received — clamped.</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Referrals Received</label><input type="number" id="referrals" value="0"
+                min="0"></div>
+            <div class="form-group"><label>Event Satisfaction (%)</label><input type="number" id="eventSatisfaction"
+                value="0" min="0" max="100" step="1"></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Local Marketing: removed socialMediaPosts, eventsWorkshops -->
+      <details class="section">
+        <summary><span class="s-left">📢 Local Marketing & Community Growth <span class="badge">175
+              Points</span></span><span class="chev">▶</span></summary>
+        <div class="section-body">
+          <div class="form-row">
+            <div class="form-group"><label>Marketing Activities</label><input type="number" id="marketingActivities"
+                value="0" min="0"></div>
+            <div class="form-group"><label>Partnerships Activated</label><input type="number" id="partnerships"
+                value="0" min="0"></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Penalty Flags (unchanged) -->
+      <details class="section">
+        <summary><span class="s-left">⚠️ Risk / Penalty Flags</span><span class="chev">▶</span></summary>
+        <div class="section-body">
+          <div class="penalty-section">
+            <div class="form-row">
+              <div class="form-group"><label>Unauthorized Discount?</label><select id="unauthorizedDiscount">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                </select></div>
+              <div class="form-group"><label>False Reporting?</label><select id="falseReporting">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                </select></div>
+              <div class="form-group"><label>Trainer Misconduct?</label><select id="trainerMisconduct">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                </select></div>
+            </div>
+            <div class="form-group" style="margin-top:6px;"><label>Comments / Observations</label><input type="text"
+                id="comments" placeholder="Optional comments..." value=""></div>
+          </div>
+        </div>
+      </details>
+
+      <div class="form-actions">
+        <button type="submit" class="submit-btn" id="submitBtn">📤 Submit Form</button>
+        <button type="button" class="clear-btn" id="clearBtn">🧹 Clear Form</button>
+        <button type="button" class="edit-btn" id="editBtn">✏️ Edit Existing Data</button>
+      </div>
+    </form>
+
+    <!-- Confirmation Popup -->
+    <div id="confirmPopup" class="confirm-popup-overlay" style="display:none;">
+      <div class="confirm-popup">
+        <h3 id="confirmTitle">📝 Record Exists</h3>
+        <p id="confirmMessage">A record already exists for this branch and month. Do you want to edit it?</p>
+        <div class="popup-actions">
+          <button class="popup-cancel" id="confirmCancel">Cancel</button>
+          <button class="popup-confirm" id="confirmYes">Yes, Edit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generic App Alert -->
+    <div id="appAlertOverlay" class="confirm-popup-overlay" style="display:none;">
+      <div class="confirm-popup">
+        <h3 id="appAlertTitle">Notice</h3>
+        <p id="appAlertMessage">Message goes here.</p>
+        <div class="popup-actions">
+          <button class="popup-cancel" id="appAlertCancel" style="display:none;">Cancel</button>
+          <button class="popup-confirm" id="appAlertOk">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submitted Records -->
+    <div class="records-section">
+      <h2>📊 Submitted Records <span class="badge" id="recordsBadge">Select a month</span></h2>
+      <p class="records-hint">Filter independently of the form above — pick a month, and optionally a branch, to browse
+        saved submissions. Click Edit on any row to load it into the form.</p>
+      <div class="filter-bar">
+        <div class="form-group">
+          <label>Filter — Month</label>
+          <input type="hidden" id="filterMonth" value="2026-08">
+          <div class="combo-wrap">
+            <input type="text" id="filterMonthDisplay" placeholder="Type or select month..." autocomplete="off">
+            <div class="combo-list" id="filterMonthList"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Filter — Branch (optional)</label>
+          <div class="combo-wrap">
+            <input type="text" id="filterBranch" placeholder="All branches (leave blank) or type to search..."
+              autocomplete="off">
+            <div class="combo-list" id="filterBranchList"></div>
+          </div>
+        </div>
+        <button type="button" class="filter-reset" id="filterReset">↺ Reset</button>
+      </div>
+      <div id="recordsWrap">
+        <div class="records-empty">Loading...</div>
+      </div>
+    </div>
+
+    <a href="/dashboard?role=it" class="back-link">← Back to Dashboard</a>
+    <a href="/formula" class="formula-link">📐 View Scoring Formula</a>
+  </div>
+
+  <script>
+    // ---------- Theme ----------
+    function applyTheme(t) { document.documentElement.setAttribute('data-theme', t); const btn = document.getElementById('themeToggle'); if (btn) btn.textContent = t === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'; }
+    function toggleTheme() { const current = document.documentElement.getAttribute('data-theme') || 'light'; const next = current === 'dark' ? 'light' : 'dark'; localStorage.setItem('raack_theme', next); applyTheme(next); }
+    applyTheme(localStorage.getItem('raack_theme') || 'light');
+
+    // ---------- Generic in-page alert/confirm ----------
+    function showAppAlert(message, opts) {
+      opts = opts || {};
+      const overlay = document.getElementById('appAlertOverlay');
+      const titleEl = document.getElementById('appAlertTitle');
+      const msgEl = document.getElementById('appAlertMessage');
+      const cancelBtn = document.getElementById('appAlertCancel');
+      const okBtn = document.getElementById('appAlertOk');
+      titleEl.textContent = opts.title || (opts.showCancel ? 'Please Confirm' : 'Notice');
+      msgEl.innerHTML = message;
+      cancelBtn.style.display = opts.showCancel ? 'inline-block' : 'none';
+      cancelBtn.textContent = opts.cancelText || 'Cancel';
+      okBtn.textContent = opts.okText || 'OK';
+      return new Promise((resolve) => {
+        function cleanup(result) {
+          overlay.style.display = 'none';
+          okBtn.removeEventListener('click', onOk);
+          cancelBtn.removeEventListener('click', onCancel);
+          overlay.removeEventListener('click', onOverlayClick);
+          resolve(result);
+        }
+        function onOk() { cleanup(true); }
+        function onCancel() { cleanup(false); }
+        function onOverlayClick(e) { if (e.target === overlay) cleanup(false); }
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        overlay.addEventListener('click', onOverlayClick);
+        overlay.style.display = 'flex';
+      });
+    }
+    function showAppConfirm(message, opts) { opts = opts || {}; opts.showCancel = true; return showAppAlert(message, opts); }
+
+    // ---------- Generic custom combobox ----------
+    function createCombobox(opts) {
+      const input = document.getElementById(opts.inputId);
+      const list = document.getElementById(opts.listId);
+      let items = opts.items;
+      let filtered = [];
+      let activeIndex = -1;
+
+      function render(query) {
+        const q = (query || '').trim().toLowerCase();
+        filtered = q ? items.filter(it => opts.getLabel(it).toLowerCase().includes(q)) : items.slice();
+        list.innerHTML = filtered.length
+          ? filtered.map((it, i) => `<div class="combo-option" data-idx="${i}">${opts.getLabel(it)}</div>`).join('')
+          : '<div class="combo-empty">No matches</div>';
+        activeIndex = -1;
+        list.classList.add('show');
+      }
+      function close() { list.classList.remove('show'); activeIndex = -1; }
+      function highlight() {
+        const opts2 = list.querySelectorAll('.combo-option');
+        opts2.forEach((o, i) => o.classList.toggle('active', i === activeIndex));
+        const active = list.querySelector('.combo-option.active');
+        if (active) active.scrollIntoView({ block: 'nearest' });
+      }
+      function choose(it) { input.value = opts.getLabel(it); close(); if (opts.onSelect) opts.onSelect(it); }
+
+      input.addEventListener('focus', () => render(input.value));
+      input.addEventListener('input', () => render(input.value));
+      input.addEventListener('blur', () => setTimeout(close, 150));
+      input.addEventListener('keydown', (e) => {
+        if (!list.classList.contains('show')) { if (e.key === 'ArrowDown') { render(input.value); } return; }
+        if (e.key === 'ArrowDown') { e.preventDefault(); activeIndex = Math.min(activeIndex + 1, filtered.length - 1); highlight(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); highlight(); }
+        else if (e.key === 'Enter') { if (activeIndex >= 0 && filtered[activeIndex]) { e.preventDefault(); choose(filtered[activeIndex]); } }
+        else if (e.key === 'Escape') { close(); }
+      });
+      list.addEventListener('mousedown', (e) => {
+        const opt = e.target.closest('.combo-option');
+        if (!opt) return;
+        e.preventDefault();
+        const idx = parseInt(opt.dataset.idx, 10);
+        if (filtered[idx]) choose(filtered[idx]);
+      });
+      return { refreshItems(newItems) { items = newItems; } };
+    }
+
+    // ---------- Branches ----------
+    const branches = ["Kilpauk", "Mylapore", "Velachery", "Cuddalore", "Tambaram", "Mogappair", "Thoraipakkam", "Avadi", "Keelkattalai", "Mugalivakkam", "Sholinganallur", "Neelankarai", "Kolathur", "Pallikaranai", "Old Perungalathur", "Guduvanchery", "Puduchery", "Ramapuram", "Saidapet", "Old Pallavaram", "Mannivakkam", "Chidambaram", "Hasthinapuram", "Thiruverkadu", "Surapet", "Maraimalai Nagar", "Padur", "Medavakkam", "Ambattur", "Arumbakkam", "Ayapakkam", "Sithalapakkam", "Perumbakkam", "Basavanagudi", "Pudupakkam", "Urapakkam", "Thanjavur", "Pammal", "Kumbakonam", "Maduravoyal", "Kandigai", "Kundrathur", "Madambakkam", "Navalur", "Kelambakkam", "Iyyapanthangal", "Mappedu"];
+
+    createCombobox({ inputId: 'branch', listId: 'branchList', items: branches, getLabel: b => b, onSelect: () => triggerCheck() });
+    createCombobox({ inputId: 'filterBranch', listId: 'filterBranchList', items: branches, getLabel: b => b, onSelect: () => renderRecordsTable() });
+
+    // ---------- Months ----------
+    const MONTHS = [{ value: '2026-01', label: 'January 2026' }, { value: '2026-02', label: 'February 2026' }, { value: '2026-03', label: 'March 2026' }, { value: '2026-04', label: 'April 2026' }, { value: '2026-05', label: 'May 2026' }, { value: '2026-06', label: 'June 2026' }, { value: '2026-07', label: 'July 2026' }, { value: '2026-08', label: 'August 2026' }, { value: '2026-09', label: 'September 2026' }, { value: '2026-10', label: 'October 2026' }, { value: '2026-11', label: 'November 2026' }, { value: '2026-12', label: 'December 2026' }];
+    function monthLabel(value) { const m = MONTHS.find(x => x.value === value); return m ? m.label : (value || ''); }
+    function syncMonthDisplayFromValue(hiddenId, displayId) { const hidden = document.getElementById(hiddenId); const display = document.getElementById(displayId); if (hidden && display) display.value = monthLabel(hidden.value); }
+    syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay'); syncMonthDisplayFromValue('filterMonth', 'filterMonthDisplay');
+
+    // ---------- QUARTERLY FIELD LOGIC ----------
+    function isQuarterStart(monthStr) {
+      if (!monthStr) return false;
+      const month = parseInt(monthStr.split('-')[1], 10);
+      return [6, 9, 12, 3].includes(month);
+    }
+
+    function updateQuarterlyFields() {
+      const month = document.getElementById('reportMonth').value;
+      const isQS = isQuarterStart(month);
+      const quarterlyFields = ['brandingCompliance', 'mysteryAuditScore', 'satisfactionScore'];
+      quarterlyFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (isQS) {
+          el.disabled = false;
+          el.classList.remove('field-quarterly-inactive');
+          // Remove the "read-only" feel
+          el.style.background = '';
+          el.style.cursor = '';
+        } else {
+          el.disabled = true;
+          el.classList.add('field-quarterly-inactive');
+          // Ensure the value is still displayed but greyed out
+        }
+      });
+    }
+
+    // ---------- Helpers ----------
+    const getVal = (id) => document.getElementById(id).value;
+    const getNum = (id) => Math.max(0, parseFloat(getVal(id)) || 0);
+    const getInt = (id) => Math.max(0, parseInt(getVal(id)) || 0);
+
+    // Updated: removed batchUtilization, trainerAttendance, hygieneScore, curriculumCompliance, trainerCertification
+    const PERCENT_FIELD_IDS = ['feeCollectionRate', 'operatingMargin', 'attendanceRecording', 'crmUsage', 'reportSubmission', 'brandingCompliance', 'mysteryAuditScore', 'satisfactionScore', 'eventSatisfaction'];
+
+    function flashWarning(id) { const warn = document.getElementById(id + '-warn'); const el = document.getElementById(id); if (!el) return; el.classList.add('field-invalid'); if (warn) warn.classList.add('show'); clearTimeout(el._warnTimer); el._warnTimer = setTimeout(() => { el.classList.remove('field-invalid'); if (warn) warn.classList.remove('show'); }, 1400); }
+
+    function clampToOwnBounds(el) { if (el.value === '') return; const min = el.min !== '' ? parseFloat(el.min) : null; const max = el.max !== '' ? parseFloat(el.max) : null; let v = parseFloat(el.value); if (isNaN(v)) return; let changed = false; if (min !== null && v < min) { v = min; changed = true; } if (max !== null && v > max) { v = max; changed = true; } if (changed) { el.value = v; flashWarning(el.id); } }
+    document.querySelectorAll('#itForm input[type="number"][max]').forEach(el => { if (PERCENT_FIELD_IDS.includes(el.id)) return; el.addEventListener('input', () => clampToOwnBounds(el)); el.addEventListener('blur', () => clampToOwnBounds(el)); });
+
+    // Updated: removed trialConversions/trialsConducted and classesConducted/classesPlanned
+    const RELATIVE_CLAMPS = [['tshirtPaid', 'tshirtDue'], ['salaryPaid', 'salaryDue'], ['hotelPaid', 'hotelDue'], ['merchPaid', 'merchDue'], ['complaintsResolved', 'complaintsReceived']];
+    function clampRelative(fieldId, boundId) { const field = document.getElementById(fieldId); const bound = document.getElementById(boundId); if (!field || !bound) return; if (field.value === '') return; const max = parseFloat(bound.value) || 0; const v = parseFloat(field.value); if (isNaN(v)) return; if (v > max) { field.value = max; flashWarning(fieldId); } }
+    RELATIVE_CLAMPS.forEach(([fieldId, boundId]) => { const field = document.getElementById(fieldId); const bound = document.getElementById(boundId); if (!field || !bound) return; field.addEventListener('input', () => clampRelative(fieldId, boundId)); field.addEventListener('blur', () => clampRelative(fieldId, boundId)); bound.addEventListener('input', () => clampRelative(fieldId, boundId)); bound.addEventListener('blur', () => clampRelative(fieldId, boundId)); });
+
+    function clampPercentValue(el) { if (!el || el.value === '') return; const raw = parseFloat(el.value); if (isNaN(raw)) return; let v = Math.round(raw); if (v < 0) v = 0; if (v > 100) v = 100; if (v !== raw) { el.value = v; flashWarning(el.id); } }
+    PERCENT_FIELD_IDS.forEach(id => { const el = document.getElementById(id); if (!el) return; el.addEventListener('input', () => clampPercentValue(el)); el.addEventListener('blur', () => clampPercentValue(el)); });
+
+    function clampDropouts() { const opening = parseFloat(getVal('openingStudents')) || 0; const newEnroll = parseFloat(getVal('newEnrollments')) || 0; const dropoutsEl = document.getElementById('dropouts'); if (dropoutsEl.value === '') return; const max = opening + newEnroll; const v = parseFloat(dropoutsEl.value); if (isNaN(v)) return; if (v > max) { dropoutsEl.value = max; flashWarning('dropouts'); } }
+    ['dropouts', 'openingStudents', 'newEnrollments'].forEach(id => { const el = document.getElementById(id); el.addEventListener('input', clampDropouts); el.addEventListener('blur', clampDropouts); });
+
+    document.getElementById('googleRating').addEventListener('input', function () { const v = parseFloat(this.value); if (!isNaN(v) && (v < 1 || v > 5)) { flashWarning('googleRating'); } else { this.classList.remove('field-invalid'); document.getElementById('googleRating-warn').classList.remove('show'); } });
+
+    function resetFormToZero() { const form = document.getElementById('itForm'); form.querySelectorAll('input[type="number"]').forEach(input => { input.value = 0; }); form.querySelectorAll('input[type="text"]').forEach(input => { input.value = ''; }); document.getElementById('googleRating').value = 1; document.getElementById('branch').value = ''; document.getElementById('unauthorizedDiscount').value = 'No'; document.getElementById('falseReporting').value = 'No'; document.getElementById('trainerMisconduct').value = 'No'; document.getElementById('reportMonth').value = '2026-08'; syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay'); document.body.classList.remove('editing'); document.getElementById('editStatus').classList.remove('show'); }
+    function showSuccess(message) { const successMsg = document.getElementById('successMsg'); const errorMsg = document.getElementById('errorMsg'); errorMsg.classList.remove('show'); successMsg.textContent = `✅ ${message}`; successMsg.classList.add('show'); }
+    function showError(message) { const successMsg = document.getElementById('successMsg'); const errorMsg = document.getElementById('errorMsg'); successMsg.classList.remove('show'); errorMsg.textContent = `❌ ${message}`; errorMsg.classList.add('show'); }
+
+    // ---------- Payload & Fill (updated) ----------
+    function createPayload() {
+      document.querySelectorAll('#itForm input[type="number"][max]').forEach(el => { if (PERCENT_FIELD_IDS.includes(el.id)) clampPercentValue(el); else clampToOwnBounds(el); });
+      RELATIVE_CLAMPS.forEach(([fieldId, boundId]) => clampRelative(fieldId, boundId));
+      clampDropouts();
+      return {
+        branch: getVal('branch'),
+        report_month: getVal('reportMonth'),
+        revenue_target: getNum('revenueTarget'),
+        revenue_actual: getNum('revenueActual'),
+        tshirt_due: getNum('tshirtDue'),
+        tshirt_paid: getNum('tshirtPaid'),
+        salary_due: getNum('salaryDue'),
+        salary_paid: getNum('salaryPaid'),
+        hotel_due: getNum('hotelDue'),
+        hotel_paid: getNum('hotelPaid'),
+        merch_due: getNum('merchDue'),
+        merch_paid: getNum('merchPaid'),
+        fee_collection_rate: getNum('feeCollectionRate') / 100,
+        operating_margin: getNum('operatingMargin') / 100,
+        opening_students: getInt('openingStudents'),
+        new_student_target: getInt('newStudentTarget'),
+        new_enrollments: getInt('newEnrollments'),
+        dropouts: getInt('dropouts'),
+        closing_students: getInt('closingStudents'), // kept
+        attendance_recording: getNum('attendanceRecording') / 100,
+        crm_usage: getNum('crmUsage') / 100,
+        report_submission: getNum('reportSubmission') / 100,
+        branding_compliance: getNum('brandingCompliance') / 100,
+        mystery_audit_score: getNum('mysteryAuditScore') / 100,
+        satisfaction_score: getNum('satisfactionScore') / 100,
+        google_rating: getNum('googleRating'),
+        complaints_received: getInt('complaintsReceived'),
+        complaints_resolved: getInt('complaintsResolved'),
+        referrals: getInt('referrals'),
+        event_satisfaction: getNum('eventSatisfaction') / 100,
+        marketing_activities: getInt('marketingActivities'),
+        partnerships: getInt('partnerships'),
+        unauthorized_discount: getVal('unauthorizedDiscount'),
+        false_reporting: getVal('falseReporting'),
+        trainer_misconduct: getVal('trainerMisconduct'),
+        comments: getVal('comments')
+      };
+    }
+
+    function fillForm(data) {
+      const map = {
+        revenue_target: 'revenueTarget',
+        revenue_actual: 'revenueActual',
+        tshirt_due: 'tshirtDue',
+        tshirt_paid: 'tshirtPaid',
+        salary_due: 'salaryDue',
+        salary_paid: 'salaryPaid',
+        hotel_due: 'hotelDue',
+        hotel_paid: 'hotelPaid',
+        merch_due: 'merchDue',
+        merch_paid: 'merchPaid',
+        opening_students: 'openingStudents',
+        new_student_target: 'newStudentTarget',
+        new_enrollments: 'newEnrollments',
+        dropouts: 'dropouts',
+        closing_students: 'closingStudents',
+        complaints_received: 'complaintsReceived',
+        complaints_resolved: 'complaintsResolved',
+        referrals: 'referrals',
+        marketing_activities: 'marketingActivities',
+        partnerships: 'partnerships'
+      };
+      if (data.branch) document.getElementById('branch').value = data.branch;
+      if (data.report_month) { document.getElementById('reportMonth').value = data.report_month; syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay'); }
+      Object.keys(map).forEach(key => {
+        const element = document.getElementById(map[key]);
+        if (!element) return;
+        if (data[key] !== undefined && data[key] !== null) {
+          element.value = Math.max(0, Number(data[key]) || 0);
+        }
+      });
+      const percentageFields = {
+        fee_collection_rate: 'feeCollectionRate',
+        operating_margin: 'operatingMargin',
+        attendance_recording: 'attendanceRecording',
+        crm_usage: 'crmUsage',
+        report_submission: 'reportSubmission',
+        branding_compliance: 'brandingCompliance',
+        mystery_audit_score: 'mysteryAuditScore',
+        satisfaction_score: 'satisfactionScore',
+        event_satisfaction: 'eventSatisfaction'
+      };
+      Object.keys(percentageFields).forEach(key => {
+        const element = document.getElementById(percentageFields[key]);
+        if (element && data[key] !== undefined && data[key] !== null) {
+          const raw = Math.max(0, Math.min(100, Number(data[key]) * 100));
+          element.value = String(Math.round(raw));
+        }
+      });
+      if (data.google_rating !== undefined && data.google_rating !== null) {
+        document.getElementById('googleRating').value = Math.min(5, Math.max(1, Number(data.google_rating) || 1));
+      }
+      if (data.unauthorized_discount) document.getElementById('unauthorizedDiscount').value = data.unauthorized_discount;
+      if (data.false_reporting) document.getElementById('falseReporting').value = data.false_reporting;
+      if (data.trainer_misconduct) document.getElementById('trainerMisconduct').value = data.trainer_misconduct;
+      if (data.comments !== undefined) document.getElementById('comments').value = data.comments || '';
+      document.querySelectorAll('#itForm input[type="number"][max]').forEach(el => { if (PERCENT_FIELD_IDS.includes(el.id)) clampPercentValue(el); else clampToOwnBounds(el); });
+      RELATIVE_CLAMPS.forEach(([fieldId, boundId]) => clampRelative(fieldId, boundId));
+      clampDropouts();
+      // Apply quarterly field state
+      updateQuarterlyFields();
+    }
+
+    // ---------- Load into form (API) ----------
+    async function loadIntoForm(branch, month, opts) {
+      opts = opts || {};
+      const btn = opts.button || null;
+      const originalText = btn ? btn.textContent : null;
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Loading...'; }
+      try {
+        const url = `/api/it/get?branch=${encodeURIComponent(branch)}&report_month=${encodeURIComponent(month)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+          let message = `No saved data found for ${branch} — ${month}.`;
+          try { const error = await response.json(); message = error.detail || message; } catch (parseErr) { }
+          console.error('loadIntoForm failed:', response.status, url);
+          showError(message);
+          return false;
+        }
+        const data = await response.json();
+        console.log('loadIntoForm: received', data);
+        fillForm(data);
+        document.body.classList.add('editing');
+        document.getElementById('editStatus').classList.add('show');
+        showSuccess(`Existing data loaded for ${branch} — ${month}. You can edit and submit.`);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return true;
+      } catch (error) {
+        console.error('loadIntoForm network error:', error);
+        showError(error.message || 'Unable to load saved data. Check your connection or backend.');
+        return false;
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = originalText; }
+      }
+    }
+
+    // ---------- Global records cache ----------
+    let allRecords = [];
+
+    function findExistingRecord(branch, month) {
+      if (!allRecords || allRecords.length === 0) return null;
+      return allRecords.find(r => r.branch === branch && r.report_month === month) || null;
+    }
+
+    // ---------- Confirmation Popup ----------
+    let pendingRecord = null;
+    let pendingSource = 'formCheck';
+
+    function showConfirmPopup(record, source) {
+      pendingRecord = record;
+      pendingSource = source || 'formCheck';
+      const overlay = document.getElementById('confirmPopup');
+      const title = document.getElementById('confirmTitle');
+      const msg = document.getElementById('confirmMessage');
+      if (source === 'tableEdit') {
+        title.textContent = '📂 Load Record?';
+        msg.innerHTML = `Load the record for <strong>${record.branch}</strong> – <strong>${monthLabel(record.report_month)}</strong> into the form?<br><span style="font-size:13px;color:var(--grey-500);">Any unsaved changes will be lost.</span>`;
+      } else {
+        title.textContent = '📝 Record Exists';
+        msg.innerHTML = `A record already exists for <strong>${record.branch}</strong> – <strong>${monthLabel(record.report_month)}</strong>.<br>Do you want to edit it?`;
+      }
+      overlay.style.display = 'flex';
+    }
+
+    document.getElementById('confirmCancel').addEventListener('click', function () {
+      document.getElementById('confirmPopup').style.display = 'none';
+      pendingRecord = null;
+    });
+    document.getElementById('confirmYes').addEventListener('click', function () {
+      document.getElementById('confirmPopup').style.display = 'none';
+      if (pendingRecord) {
+        fillForm(pendingRecord);
+        document.body.classList.add('editing');
+        document.getElementById('editStatus').classList.add('show');
+        showSuccess(`Loaded data for ${pendingRecord.branch} — ${monthLabel(pendingRecord.report_month)}. You can edit and submit.`);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        pendingRecord = null;
+      }
+    });
+
+    document.getElementById('confirmPopup').addEventListener('click', function (e) {
+      if (e.target === this) {
+        this.style.display = 'none';
+        pendingRecord = null;
+      }
+    });
+
+    // ---------- Check for existing record ----------
+    function checkForExisting() {
+      const branch = document.getElementById('branch').value.trim();
+      const month = document.getElementById('reportMonth').value;
+      if (!branch || !month) return;
+      if (document.body.classList.contains('editing')) return;
+
+      const existing = findExistingRecord(branch, month);
+      if (existing) {
+        showConfirmPopup(existing, 'formCheck');
+      }
+    }
+
+    const branchInput = document.getElementById('branch');
+    const monthDisplay = document.getElementById('reportMonthDisplay');
+
+    function triggerCheck() {
+      setTimeout(checkForExisting, 100);
+    }
+
+    branchInput.addEventListener('change', triggerCheck);
+    branchInput.addEventListener('blur', function () {
+      if (this.value.trim()) triggerCheck();
+    });
+    monthDisplay.addEventListener('change', function () {
+      triggerCheck();
+      // Also update quarterly field state when month changes
+      updateQuarterlyFields();
+    });
+    monthDisplay.addEventListener('blur', function () {
+      if (this.value.trim()) {
+        triggerCheck();
+        updateQuarterlyFields();
+      }
+    });
+
+    // ---------- Form submit, clear, edit ----------
+    document.getElementById('editBtn').addEventListener('click', async function () {
+      const branch = getVal('branch');
+      const month = getVal('reportMonth');
+      if (!branch) { await showAppAlert('Please select a branch first.', { title: '⚠️ Branch Required' }); return; }
+      if (!branches.includes(branch)) { await showAppAlert('Please select a valid branch from the suggestions list.', { title: '⚠️ Invalid Branch' }); return; }
+      if (!month) { await showAppAlert('Please select a reporting month first.', { title: '⚠️ Month Required' }); return; }
+      const existing = findExistingRecord(branch, month);
+      if (existing) {
+        showConfirmPopup(existing, 'formCheck');
+        return;
+      }
+      await loadIntoForm(branch, month, { button: this });
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', async function () {
+      const confirmed = await showAppConfirm('Are you sure you want to clear all entered values?', { title: '🧹 Clear Form', okText: 'Yes, Clear', cancelText: 'Cancel' });
+      if (!confirmed) return;
+      resetFormToZero();
+      document.getElementById('successMsg').classList.remove('show');
+      document.getElementById('errorMsg').classList.remove('show');
+      updateQuarterlyFields();
+    });
+
+    document.getElementById('itForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      const payload = createPayload();
+      if (!payload.branch) { await showAppAlert('Please select a branch.', { title: '⚠️ Branch Required' }); return; }
+      if (!branches.includes(payload.branch)) { await showAppAlert('Please select a valid branch from the suggestions list.', { title: '⚠️ Invalid Branch' }); return; }
+      if (!payload.report_month) { await showAppAlert('Please select a reporting month.', { title: '⚠️ Month Required' }); return; }
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Submitting...';
+      try {
+        const response = await fetch('/api/it/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (response.ok) {
+          let result = {};
+          try { result = await response.json(); } catch (parseErr) { }
+          const mode = result.mode || (document.body.classList.contains('editing') ? 'updated' : 'created');
+          showSuccess(mode === 'updated' ? 'Existing data updated successfully!' : 'Form created successfully!');
+          document.getElementById('filterMonth').value = payload.report_month;
+          syncMonthDisplayFromValue('filterMonth', 'filterMonthDisplay');
+          resetFormToZero();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          renderRecordsTable();
+        } else {
+          let errorText = 'Unable to submit the form.';
+          try { const error = await response.json(); errorText = error.detail || error.message || errorText; } catch (parseErr) { }
+          showError(errorText);
+        }
+      } catch (error) {
+        showError(error.message || 'Network error. Please try again.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '📤 Submit Form';
+      }
+    });
+
+    // ---------- Formatting ----------
+    function fmtPct(v) { if (v === undefined || v === null) return '—'; return (Number(v) * 100).toFixed(1) + '%'; }
+    function fmtNum(v) { if (v === undefined || v === null) return '—'; return Number(v).toLocaleString('en-IN'); }
+    function fmtText(v) { return (v === undefined || v === null || v === '') ? '—' : v; }
+
+    // Updated ALL_FIELDS: removed the green fields
+    const ALL_FIELDS = [
+      ['report_month', 'Reporting Month', 'text'],
+      ['revenue_target', 'Revenue Target', 'currency'],
+      ['revenue_actual', 'Revenue Actual', 'currency'],
+      ['tshirt_due', 'T-shirt/Uniform Due', 'currency'],
+      ['tshirt_paid', 'T-shirt/Uniform Paid', 'currency'],
+      ['salary_due', 'Instructor Salary Due', 'currency'],
+      ['salary_paid', 'Instructor Salary Paid', 'currency'],
+      ['hotel_due', 'Hotel/Accommodation Due', 'currency'],
+      ['hotel_paid', 'Hotel/Accommodation Paid', 'currency'],
+      ['merch_due', 'Merchandise Due', 'currency'],
+      ['merch_paid', 'Merchandise Paid', 'currency'],
+      ['fee_collection_rate', 'Fee Collection', 'pct'],
+      ['operating_margin', 'Operating Margin', 'pct'],
+      ['opening_students', 'Opening Students', 'num'],
+      ['new_student_target', 'New Admission Target', 'num'],
+      ['new_enrollments', 'New Paid Admissions', 'num'],
+      ['dropouts', 'Dropouts', 'num'],
+      ['closing_students', 'Closing Students', 'num'],
+      // removed: batch_utilization, trials_conducted, trial_conversions
+      ['attendance_recording', 'Attendance Recording Compliance', 'pct'],
+      ['crm_usage', 'CRM/App Usage Compliance', 'pct'],
+      ['report_submission', 'Report Submission Compliance', 'pct'],
+      // removed: classes_planned, classes_conducted, trainer_attendance
+      // removed: hygiene_score, curriculum_compliance, trainer_certification
+      ['branding_compliance', 'Branding/Signage Compliance', 'pct'],
+      ['mystery_audit_score', 'Audit/Mystery Visit Score', 'pct'],
+      ['satisfaction_score', 'Parent/Student Satisfaction', 'pct'],
+      ['google_rating', 'Average Google Rating', 'num'],
+      ['complaints_received', 'Complaints Received', 'num'],
+      ['complaints_resolved', 'Complaints Resolved', 'num'],
+      ['referrals', 'Referrals Received', 'num'],
+      ['event_satisfaction', 'Event/Workshop Satisfaction', 'pct'],
+      ['marketing_activities', 'Marketing Activities Completed', 'num'],
+      ['partnerships', 'Partnerships Activated', 'num'],
+      // removed: social_media_posts, events_workshops
+      ['unauthorized_discount', 'Unauthorized Discount?', 'text'],
+      ['false_reporting', 'False Reporting Detected?', 'text'],
+      ['trainer_misconduct', 'Trainer Misconduct Issue?', 'text'],
+      ['comments', 'Comments/Observations', 'text']
+    ];
+    function fmtField(type, v) { if (type === 'currency') return '₹' + fmtNum(v); if (type === 'pct') return fmtPct(v); if (type === 'num') return fmtNum(v); return fmtText(v); }
+
+    // ---------- Render records table ----------
+    async function renderRecordsTable() {
+      const wrap = document.getElementById('recordsWrap');
+      const badge = document.getElementById('recordsBadge');
+      const branch = getVal('filterBranch');
+      const month = getVal('filterMonth');
+      if (!month) { badge.textContent = 'Select a month'; wrap.innerHTML = '<div class="records-empty">Select a month in the filter bar above to view submitted data.</div>'; return; }
+      wrap.innerHTML = '<div class="records-empty">Loading...</div>';
+      if (!branch) {
+        badge.textContent = `All branches — ${month}`;
+        try {
+          const res = await fetch(`/api/it/all?month=${encodeURIComponent(month)}`);
+          if (!res.ok) throw new Error('No data endpoint or no records for this month.');
+          const rows = await res.json();
+          allRecords = rows;
+          if (!rows || !rows.length) {
+            wrap.innerHTML = '<div class="records-empty">No submissions found for this month yet.</div>';
+            return;
+          }
+          let html = '<div class="desktop-only"><div class="table-wrap"><table class="records-table"><thead><tr><th></th><th>#</th><th>Branch</th>' + ALL_FIELDS.map(([key, label]) => `<th>${label}</th>`).join('') + '</tr></thead><tbody>';
+          rows.forEach((r, idx) => {
+            html += `<tr><td><button type="button" class="row-edit-btn" data-branch="${r.branch}" data-month="${month}" data-record='${JSON.stringify(r).replace(/'/g, "&#39;")}'>✏️ Edit</button></td><td class="row-num">${idx + 1}</td><td><strong>${r.branch || '—'}</strong></td>` + ALL_FIELDS.map(([key, label, type]) => `<td>${fmtField(type, r[key])}</td>`).join('') + `</tr>`;
+          });
+          html += '</tbody></table></div></div><div class="mobile-only"><div class="card-list-wrap">';
+          rows.forEach((r, idx) => {
+            html += `<div class="record-card"><div class="record-card-head"><button type="button" class="row-edit-btn" data-branch="${r.branch}" data-month="${month}" data-record='${JSON.stringify(r).replace(/'/g, "&#39;")}'>✏️ Edit</button><strong>${idx + 1}. ${r.branch || '—'}</strong></div><div class="card-fields">` + ALL_FIELDS.map(([key, label, type]) => `<div class="card-field"><span class="card-k">${label}</span><span class="card-v">${fmtField(type, r[key])}</span></div>`).join('') + `</div></div>`;
+          });
+          html += '</div></div>';
+          wrap.innerHTML = html;
+          wrap.querySelectorAll('.row-edit-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+              const branch = this.dataset.branch;
+              const month = this.dataset.month;
+              let record = null;
+              try { record = JSON.parse(this.dataset.record); } catch (e) { }
+              if (record) {
+                showConfirmPopup(record, 'tableEdit');
+              } else {
+                const cached = findExistingRecord(branch, month);
+                if (cached) {
+                  showConfirmPopup(cached, 'tableEdit');
+                } else {
+                  loadIntoForm(branch, month, { button: this });
+                }
+              }
+            });
+          });
+        } catch (err) {
+          console.error('renderRecordsTable (all branches) error:', err);
+          wrap.innerHTML = `<div class="records-empty">Could not load branch list for this month.<br><small>${err.message}</small></div>`;
+        }
+      } else {
+        badge.textContent = `${branch} — ${month}`;
+        try {
+          const res = await fetch(`/api/it/get?branch=${encodeURIComponent(branch)}&report_month=${encodeURIComponent(month)}`);
+          if (!res.ok) {
+            wrap.innerHTML = `<div class="records-empty">No saved data yet for ${branch} — ${month}.</div>`;
+            return;
+          }
+          const d = await res.json();
+          const existingIdx = allRecords.findIndex(r => r.branch === d.branch && r.report_month === d.report_month);
+          if (existingIdx > -1) allRecords[existingIdx] = d;
+          else allRecords.push(d);
+          let html = `<div style="margin-bottom:14px;"><button type="button" class="row-edit-btn" id="detailEditBtn" data-record='${JSON.stringify(d).replace(/'/g, "&#39;")}'>✏️ Edit This Record</button></div><div class="table-wrap"><table class="records-table detail-table"><tbody><tr><td class="k">Branch</td><td class="v">${fmtText(d.branch)}</td></tr>`;
+          ALL_FIELDS.forEach(([key, label, type]) => {
+            html += `<tr><td class="k">${label}</td><td class="v">${fmtField(type, d[key])}</td></tr>`;
+          });
+          html += '</tbody></table></div>';
+          wrap.innerHTML = html;
+          document.getElementById('detailEditBtn').addEventListener('click', function () {
+            let record = null;
+            try { record = JSON.parse(this.dataset.record); } catch (e) { }
+            if (record) {
+              showConfirmPopup(record, 'tableEdit');
+            } else {
+              loadIntoForm(branch, month, { button: this });
+            }
+          });
+        } catch (err) {
+          console.error('renderRecordsTable (single branch) error:', err);
+          wrap.innerHTML = `<div class="records-empty">Could not load this record.<br><small>${err.message}</small></div>`;
+        }
+      }
+    }
+
+    document.getElementById('filterReset').addEventListener('click', function () {
+      document.getElementById('filterMonth').value = '2026-08';
+      syncMonthDisplayFromValue('filterMonth', 'filterMonthDisplay');
+      document.getElementById('filterBranch').value = '';
+      renderRecordsTable();
+    });
+    renderRecordsTable();
+
+    // ---------- Missing button ----------
+    document.getElementById('missingBtn').addEventListener('click', function () {
+      const initialMonth = document.getElementById('filterMonth').value || document.getElementById('reportMonth').value || '2026-08';
+      const overlay = document.createElement('div');
+      overlay.className = 'missing-popup-overlay';
+      overlay.innerHTML = `
+      <div class="missing-popup">
+        <h2>📋 Missing Branches</h2>
+        <div class="form-group">
+          <label>Month</label>
+          <select id="missingMonthSelect"></select>
+        </div>
+        <p id="missingSummary" style="margin-bottom:12px;color:var(--grey-500);">Loading...</p>
+        <div id="missingListWrap"><p class="missing-empty">Loading...</p></div>
+        <button type="button" class="close-btn">Close</button>
+      </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector('.close-btn').addEventListener('click', () => overlay.remove());
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+      const monthSelect = overlay.querySelector('#missingMonthSelect');
+      MONTHS.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.value;
+        opt.textContent = m.label;
+        monthSelect.appendChild(opt);
+      });
+      monthSelect.value = initialMonth;
+      async function loadMissingFor(month) {
+        const summaryEl = overlay.querySelector('#missingSummary');
+        const listWrap = overlay.querySelector('#missingListWrap');
+        summaryEl.textContent = 'Loading...';
+        listWrap.innerHTML = '<p class="missing-empty">Loading...</p>';
+        try {
+          const res = await fetch(`/api/it/all?month=${encodeURIComponent(month)}`);
+          let submitted = [];
+          if (res.ok) {
+            const data = await res.json();
+            submitted = data.map(item => item.branch);
+          }
+          const missing = branches.filter(b => !submitted.includes(b));
+          summaryEl.textContent = `${missing.length} out of ${branches.length} branches have not submitted data for ${monthLabel(month)}.`;
+          listWrap.innerHTML = missing.length === 0
+            ? '<p class="missing-empty">✅ All branches have submitted data for this month.</p>'
+            : `<ul>${missing.map((b, idx) => `<li><span class="missing-num">${idx + 1}.</span><span>📍</span> ${b}</li>`).join('')}</ul>`;
+        } catch (e) {
+          summaryEl.textContent = '';
+          listWrap.innerHTML = '<p class="missing-empty">Could not fetch missing branches. Check backend /api/it/all</p>';
+        }
+      }
+      monthSelect.addEventListener('change', () => loadMissingFor(monthSelect.value));
+      loadMissingFor(initialMonth);
+    });
+
+    // ---------- Keyboard navigation ----------
+    function setupKeyboardNav(containerSelector) {
+      document.querySelectorAll(containerSelector).forEach(section => {
+        const inputs = section.querySelectorAll('input, select');
+        if (inputs.length === 0) return;
+        const grid = [];
+        let currentRow = [];
+        let prevTop = -1;
+        inputs.forEach(inp => {
+          const rect = inp.getBoundingClientRect();
+          const top = Math.round(rect.top);
+          if (top !== prevTop && currentRow.length > 0) {
+            grid.push(currentRow);
+            currentRow = [];
+          }
+          currentRow.push(inp);
+          prevTop = top;
+        });
+        if (currentRow.length > 0) grid.push(currentRow);
+        const flat = inputs;
+        flat.forEach((inp) => {
+          let rowIdx = 0, colIdx = 0;
+          for (let r = 0; r < grid.length; r++) {
+            const c = grid[r].indexOf(inp);
+            if (c !== -1) { rowIdx = r; colIdx = c; break; }
+          }
+          inp.addEventListener('keydown', function (e) {
+            const key = e.key;
+            if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) return;
+            e.preventDefault();
+            const currentRowArr = grid[rowIdx] || [];
+            const colCount = currentRowArr.length;
+            let target = null;
+            if (key === 'ArrowLeft' && colIdx > 0) target = currentRowArr[colIdx - 1];
+            else if (key === 'ArrowRight' && colIdx < colCount - 1) target = currentRowArr[colIdx + 1];
+            else if (key === 'ArrowUp' && rowIdx > 0) {
+              const above = grid[rowIdx - 1] || [];
+              const targetCol = Math.min(colIdx, above.length - 1);
+              target = above[targetCol] || above[above.length - 1] || null;
+            } else if (key === 'ArrowDown' && rowIdx < grid.length - 1) {
+              const below = grid[rowIdx + 1] || [];
+              const targetCol = Math.min(colIdx, below.length - 1);
+              target = below[targetCol] || below[below.length - 1] || null;
+            }
+            if (target) target.focus();
+          });
+        });
+      });
+    }
+    setTimeout(() => setupKeyboardNav('.section'), 100);
+
+    // Initialise quarterly field state on page load
+    updateQuarterlyFields();
+  </script>
+</body>
+
+</html>

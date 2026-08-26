@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAACK Scorify — Smart Franchise Performance Scoring</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* =====================================================
+       RAACK SCORIFY — COLOR SYSTEM
+    ===================================================== */
+    :root {
+      --raack-red: #e3182f;
+      --raack-red-rgb: 227, 24, 47;
+      --raack-red-dark: #b80f24;
+      --raack-red-deep: #8f0d1d;
+      --raack-red-light: #ff4053;
+
+      --page-bg: #ffffff;
+
+      --pink-soft: #fff3f4;
+      --pink-light: #fde7e9;
+
+      --white: #ffffff;
+      --black: #171114;
+
+      --text: #241d20;
+      --text-light: #6b5e62;
+
+      --border: #ece2e3;
+
+      --shadow: 0 20px 50px rgba(227, 24, 47, 0.10);
+      --shadow-button: 0 14px 30px rgba(227, 24, 47, 0.32);
+    }
+
+    /* =====================================================
+       DARK MODE
+    ===================================================== */
+    [data-theme="dark"] {
+      --page-bg: #120a0c;
+      --white: #fff7f8;
+      --text: #fff4f5;
+      --text-light: #d5bfc3;
+      --border: #3a1c21;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    /* =====================================================
+       RESET
+    ===================================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* =====================================================
+       BODY
+    ===================================================== */
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text);
+      background: var(--page-bg);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: background .3s ease, color .3s ease;
+    }
+
+    [data-theme="dark"] body {
+      background: var(--page-bg);
+    }
+
+    /* =====================================================
+       NAVIGATION — no divider line
+    ===================================================== */
+    nav {
+      width: 100%;
+      height: 120px;
+      padding: 20px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: var(--page-bg);
+      transition: background .3s ease;
+    }
+
+    /* =====================================================
+       LOGO — same strategy as login.html (which renders
+       correctly in both themes)
+    ===================================================== */
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-img-wrap {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: transparent;
+      overflow: hidden;
+      transition: transform .25s ease;
+    }
+
+    .logo-img-wrap:hover {
+      transform: scale(1.05);
+    }
+
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      /* Same as login page: multiply in light mode */
+      mix-blend-mode: multiply;
+    }
+
+    /* Dark mode: normal blend mode (same as login page) */
+    [data-theme="dark"] .logo-img {
+      mix-blend-mode: normal;
+    }
+
+    /* =====================================================
+       NAV RIGHT
+    ===================================================== */
+    .nav-right {
+      display: flex;
+      align-items: center;
+    }
+
+    /* =====================================================
+       THEME BUTTON
+    ===================================================== */
+    .theme-toggle {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: all .25s ease;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--raack-red);
+      color: var(--raack-red);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(var(--raack-red-rgb), 0.14);
+    }
+
+    [data-theme="dark"] .theme-toggle {
+      background: #241317;
+      color: #fff4f5;
+      border-color: #54232c;
+    }
+
+    /* =====================================================
+       MAIN HERO
+    ===================================================== */
+    .hero {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px 20px 20px;
+      overflow: hidden;
+    }
+
+    /* =====================================================
+       TAG
+    ===================================================== */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 17px;
+      border: 1px solid rgba(var(--raack-red-rgb), 0.22);
+      background: var(--pink-soft);
+      border-radius: 30px;
+      color: var(--raack-red);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+      margin-bottom: 26px;
+    }
+
+    [data-theme="dark"] .tag {
+      background: rgba(var(--raack-red-rgb), 0.12);
+    }
+
+    .tag::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--raack-red);
+      box-shadow: 0 0 8px rgba(var(--raack-red-rgb), 0.6);
+    }
+
+    /* =====================================================
+       WORDMARK
+    ===================================================== */
+    .brand-mark {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+    }
+
+    .brand-raack {
+      font-family: 'Anton', 'Oswald', sans-serif;
+      font-weight: 400;
+      font-size: clamp(52px, 9vw, 108px);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--raack-red);
+      line-height: 0.9;
+    }
+
+    .brand-scorify {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      font-size: clamp(18px, 2.6vw, 30px);
+      letter-spacing: 12px;
+      text-transform: uppercase;
+      color: var(--raack-red);
+      margin-top: 20px;
+    }
+
+    /* =====================================================
+       SUBTITLE
+    ===================================================== */
+    .subtitle {
+      margin-top: 26px;
+      max-width: 620px;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text-light);
+      font-weight: 400;
+    }
+
+    /* =====================================================
+       CTA
+    ===================================================== */
+    .cta-row {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .btn-primary {
+      padding: 14px 38px;
+      border: none;
+      border-radius: 12px;
+      background: var(--raack-red);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      cursor: pointer;
+      box-shadow: var(--shadow-button);
+      transition: transform .22s ease, box-shadow .22s ease, background .22s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--raack-red-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 18px 36px rgba(var(--raack-red-rgb), 0.40);
+    }
+
+    .btn-primary:active {
+      transform: translateY(-1px);
+    }
+
+    /* =====================================================
+       FOOTER
+    ===================================================== */
+    footer {
+      width: 100%;
+      height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #948488;
+      font-size: 12px;
+      background: var(--page-bg);
+    }
+
+    [data-theme="dark"] footer {
+      color: #a99398;
+    }
+
+    /* =====================================================
+       TABLET
+    ===================================================== */
+    @media (max-width: 900px) {
+      nav {
+        height: 105px;
+        padding: 16px 30px;
+      }
+      .logo-img-wrap {
+        width: 78px;
+        height: 78px;
+      }
+      .subtitle {
+        font-size: 15px;
+        max-width: 560px;
+      }
+    }
+
+    /* =====================================================
+       MOBILE
+    ===================================================== */
+    @media (max-width: 768px) {
+      nav {
+        height: 90px;
+        padding: 14px 20px;
+      }
+      .logo-img-wrap {
+        width: 64px;
+        height: 64px;
+      }
+      .theme-toggle {
+        padding: 8px 12px;
+        font-size: 11px;
+      }
+      .hero {
+        padding: 5px 18px 15px;
+      }
+      .tag {
+        font-size: 10px;
+        padding: 6px 13px;
+        margin-bottom: 18px;
+      }
+      .brand-scorify {
+        letter-spacing: 8px;
+        margin-top: 14px;
+      }
+      .subtitle {
+        margin-top: 18px;
+        font-size: 14px;
+        line-height: 1.55;
+        max-width: 500px;
+      }
+      .cta-row {
+        margin-top: 22px;
+      }
+      .btn-primary {
+        padding: 13px 30px;
+        font-size: 14px;
+      }
+      footer {
+        height: 45px;
+        font-size: 11px;
+      }
+    }
+
+    /* =====================================================
+       SMALL MOBILE
+    ===================================================== */
+    @media (max-width: 480px) {
+      nav {
+        height: 82px;
+        padding: 10px 15px;
+      }
+      .logo-img-wrap {
+        width: 56px;
+        height: 56px;
+      }
+      .theme-toggle {
+        padding: 7px 10px;
+        font-size: 10px;
+      }
+      .hero {
+        padding: 5px 14px 10px;
+      }
+      .tag {
+        font-size: 9px;
+        letter-spacing: .8px;
+        margin-bottom: 14px;
+      }
+      .brand-scorify {
+        letter-spacing: 5px;
+        margin-top: 10px;
+      }
+      .subtitle {
+        margin-top: 12px;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+      .cta-row {
+        margin-top: 18px;
+      }
+      .btn-primary {
+        padding: 12px 28px;
+        font-size: 13px;
+      }
+      footer {
+        height: 40px;
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =====================================================
+       NAVIGATION
+  ===================================================== -->
+  <nav>
+    <!-- RAACK LOGO — using same strategy as login page -->
+    <div class="logo">
+      <div class="logo-img-wrap">
+        <img
+          src="/static/logo.png"
+          alt="RAACK Academy of Dance"
+          class="logo-img"
+        />
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+        🌙 Dark Mode
+      </button>
+    </div>
+  </nav>
+
+  <!-- =====================================================
+       HERO
+  ===================================================== -->
+  <main class="hero">
+    <!-- BRAND TAG -->
+    <div class="tag">
+      Smart Franchise Performance Scoring
+    </div>
+
+    <!-- RAACK SCORIFY WORDMARK -->
+    <div class="brand-mark">
+      <span class="brand-raack">Raack</span>
+      <span class="brand-scorify">Scorify</span>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <p class="subtitle">
+      Evaluate, score, and monitor Raack franchise performance
+      across every key business area — in one refined,
+      real-time view.
+    </p>
+
+    <!-- BUTTON -->
+    <div class="cta-row">
+      <button class="btn-primary" onclick="window.location.href='/login'">
+        Get Started →
+      </button>
+    </div>
+  </main>
+
+  <!-- =====================================================
+       FOOTER
+  ===================================================== -->
+  <footer>
+    © 2026 RAACK Scorify. All Rights Reserved.
+  </footer>
+
+  <!-- =====================================================
+       THEME SCRIPT
+  ===================================================== -->
+  <script>
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      const button = document.getElementById("themeToggle");
+      if (button) {
+        button.textContent = theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode";
+      }
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute("data-theme") || "light";
+      const next = current === "dark" ? "light" : "dark";
+      localStorage.setItem("raack_theme", next);
+      applyTheme(next);
+    }
+
+    // Load saved theme
+    applyTheme(localStorage.getItem("raack_theme") || "light");
+  </script>
+</body>
+</html>
