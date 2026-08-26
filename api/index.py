@@ -20,15 +20,8 @@ if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")
     print(f"✅ Static directory mounted: {static_dir}")
 
-# Helper to serve any file from static if requested at root
-def serve_static_file(filename: str):
-    file_path = os.path.join(static_dir, filename)
-    if os.path.exists(file_path) and os.path.isfile(file_path):
-        return FileResponse(file_path)
-    return None
-
 # ============================================================
-# HTML PAGE ROUTES (must come before catch‑all)
+# HTML PAGE ROUTES (must come before catch-all)
 # ============================================================
 
 @app.get("/")
@@ -50,22 +43,6 @@ async def serve_it_form():
 @app.get("/formula")
 async def serve_formula():
     return FileResponse(os.path.join(static_dir, "formula.html")) if os.path.exists(os.path.join(static_dir, "formula.html")) else {"error": "formula.html not found"}
-
-# ============================================================
-# CATCH‑ALL ROUTE TO SERVE STATIC FILES FROM ROOT (like /logo.png)
-# ============================================================
-
-@app.get("/{path:path}")
-async def serve_any_static(path: str):
-    # If the path starts with "api/" or is already handled by specific routes, skip
-    if path.startswith("api/"):
-        raise HTTPException(status_code=404, detail="Not Found")
-    # Try to serve from static directory
-    file_path = os.path.join(static_dir, path)
-    if os.path.exists(file_path) and os.path.isfile(file_path):
-        return FileResponse(file_path)
-    # Otherwise 404
-    raise HTTPException(status_code=404, detail="File not found")
 
 # ============================================================
 # LOGIN API (hardcoded credentials – no database needed)
@@ -104,7 +81,7 @@ def _build_franchise_credentials():
     return creds
 
 FRANCHISE_CREDENTIALS = _build_franchise_credentials()
-ACTIVE_TOKENS = {}  # in‑memory token store
+ACTIVE_TOKENS = {}  # in-memory token store
 
 @app.post("/api/login")
 async def login(payload: LoginIn):
@@ -149,6 +126,20 @@ async def login(payload: LoginIn):
 @app.get("/api/health")
 async def health_check():
     return {"status": "ok", "app": "RAACK Scorify", "version": "1.0.0"}
+
+# ============================================================
+# CATCH‑ALL ROUTE TO SERVE STATIC FILES FROM ROOT (like /logo.png)
+# MUST BE AT THE BOTTOM, RIGHT BEFORE THE VERCELL HANDLER!
+# ============================================================
+
+@app.get("/{path:path}")
+async def serve_any_static(path: str):
+    # Try to serve from static directory
+    file_path = os.path.join(static_dir, path)
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        return FileResponse(file_path)
+    # Otherwise 404
+    raise HTTPException(status_code=404, detail="File not found")
 
 # ============================================================
 # VERCELL HANDLER – MUST BE AT THE BOTTOM
