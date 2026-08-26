@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from mangum import Mangum
 
-# Import your custom modules (Must be in the same folder!)
+# Import your custom modules (MUST be in the same folder as index.py)
 from database import Base, engine, get_db
 from models import Branch, ITSubmission, MonthlyScore
 from schemas import ITSubmissionIn
@@ -26,11 +26,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-Base.metadata.create_all(bind=engine)
+# Wrap in try/except to avoid crashes if DB is temporarily unreachable during cold start
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"⚠️ Error creating tables (likely DB not connected): {e}")
 
 
 # ============================================================
-# STATIC FILES – ULTIMATE VERCELL FIX (Combined with main.py)
+# STATIC FILES – ULTIMATE VERCELL FIX
 # ============================================================
 
 # Vercel's Python runtime sets the current working directory to the repo root (which is your "backend" folder).
@@ -49,7 +53,7 @@ if os.path.exists(static_dir):
 
 
 # ============================================================
-# MONTH PARSER & QUARTER HELPER (From main.py)
+# MONTH PARSER & QUARTER HELPER
 # ============================================================
 
 def parse_month(month_str: str) -> date:
@@ -80,12 +84,14 @@ def get_quarter_start_month(month_date: date) -> date:
 
 
 # ============================================================
-# BRANCHES & CREDENTIALS (From main.py)
+# BRANCHES & CREDENTIALS
 # ============================================================
 
 BRANCHES = ["Kilpauk", "Mylapore", "Velachery", "Cuddalore", "Tambaram", "Mogappair", "Thoraipakkam", "Avadi", "Keelkattalai", "Mugalivakkam", "Sholinganallur", "Neelankarai", "Kolathur", "Pallikaranai", "Old Perungalathur", "Guduvanchery", "Puduchery", "Ramapuram", "Saidapet", "Old Pallavaram", "Mannivakkam", "Chidambaram", "Hasthinapuram", "Thiruverkadu", "Surapet", "Maraimalai Nagar", "Padur", "Medavakkam", "Ambattur", "Arumbakkam", "Ayapakkam", "Sithalapakkam", "Perumbakkam", "Basavanagudi", "Pudupakkam", "Urapakkam", "Thanjavur", "Pammal", "Kumbakonam", "Maduravoyal", "Kandigai", "Kundrathur", "Madambakkam", "Navalur", "Kelambakkam", "Iyyapanthangal", "Mappedu"]
 
-BRANCH_ACCESS_CODES = { ... } # (Copy your full branch access codes here or keep the logic as is)
+BRANCH_ACCESS_CODES = {
+    "Kilpauk": "KIL123", "Mylapore": "MYL456", "Velachery": "VEL789", "Cuddalore": "CUD101", "Tambaram": "TAM202", "Mogappair": "MOG303", "Thoraipakkam": "THO404", "Avadi": "AVA505", "Keelkattalai": "KEE606", "Mugalivakkam": "MUG707", "Sholinganallur": "SHO123", "Neelankarai": "NEE456", "Kolathur": "KOL789", "Pallikaranai": "PAL101", "Old Perungalathur": "OLD202", "Guduvanchery": "GUD303", "Puduchery": "PUD404", "Ramapuram": "RAM505", "Saidapet": "SAI606", "Old Pallavaram": "OLD707", "Mannivakkam": "MAN808", "Chidambaram": "CHI909", "Hasthinapuram": "HAS101", "Thiruverkadu": "THI202", "Surapet": "SUR303", "Maraimalai Nagar": "MAR404", "Padur": "PAD505", "Medavakkam": "MED606", "Ambattur": "AMB707", "Arumbakkam": "ARU808", "Ayapakkam": "AYA909", "Sithalapakkam": "SIT101", "Perumbakkam": "PER202", "Basavanagudi": "BAS303", "Pudupakkam": "PUD404", "Urapakkam": "URA505", "Thanjavur": "THA606", "Pammal": "PAM707", "Kumbakonam": "KUM808", "Maduravoyal": "MAD909", "Kandigai": "KAN101", "Kundrathur": "KUN202", "Madambakkam": "MAD303", "Navalur": "NAV404", "Kelambakkam": "KEL505", "Iyyapanthangal": "IYY606", "Mappedu": "MAP707"
+}
 
 def _build_franchise_credentials():
     creds = {}
@@ -108,15 +114,18 @@ def initialize_branches():
     except Exception as e:
         db.rollback()
         print(f"❌ Error initializing branches: {e}")
-        raise
     finally:
         db.close()
 
-initialize_branches()
+# Wrap execution to prevent crash if DB is down on startup
+try:
+    initialize_branches()
+except Exception as e:
+    print(f"⚠️ Could not initialize branches (DB may not be reachable): {e}")
 
 
 # ============================================================
-# LOGIN & TOKEN VALIDATION (From main.py)
+# LOGIN & TOKEN VALIDATION
 # ============================================================
 
 ROLE_CREDENTIALS = {
@@ -134,22 +143,51 @@ class LoginIn(BaseModel):
 
 @app.post("/api/login")
 def login(payload: LoginIn):
-    # ... (Paste your login logic here) ...
-    # Return redirects like: "/dashboard?role=franchise&branch={branch}"
-    pass
+    username = payload.username.strip()
+    password = payload.password
+
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="Username and password are required.")
+
+    # Role login
+    for role, cred in ROLE_CREDENTIALS.items():
+        if username == cred["mobile"] and password == cred["password"]:
+            access_token = secrets.token_hex(32)
+            ACTIVE_TOKENS[access_token] = {"role": role, "username": username, "branch": None}
+            return {"status": "ok", "access_token": access_token, "role": role, "username": username, "redirect": f"/dashboard?role={role}"}
+
+    # Franchise login
+    franchise = FRANCHISE_CREDENTIALS.get(username)
+    if franchise and password == franchise["password"]:
+        access_token = secrets.token_hex(32)
+        ACTIVE_TOKENS[access_token] = {"role": "franchise", "username": username, "branch": franchise["branch"]}
+        return {"status": "ok", "access_token": access_token, "role": "franchise", "username": username, "branch": franchise["branch"], "redirect": f"/dashboard?role=franchise&branch={franchise['branch']}"}
+
+    raise HTTPException(status_code=401, detail="Invalid username or password.")
 
 def get_current_user(authorization: str | None = Header(default=None)):
-    # ... (Paste your token logic here) ...
-    pass
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authorization token required.")
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid authorization format.")
+    token = authorization.replace("Bearer ", "", 1).strip()
+    user = ACTIVE_TOKENS.get(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired access token.")
+    return {"token": token, **user}
 
 @app.post("/api/logout")
 def logout(user=Depends(get_current_user)):
-    # ... 
-    pass
+    ACTIVE_TOKENS.pop(user["token"], None)
+    return {"status": "ok", "message": "Logged out successfully."}
+
+@app.get("/api/me")
+def current_user(user=Depends(get_current_user)):
+    return {"status": "ok", "role": user["role"], "username": user["username"], "branch": user["branch"]}
 
 
 # ============================================================
-# PAGES (Combined with robust static_dir)
+# PAGES
 # ============================================================
 
 @app.get("/")
@@ -174,9 +212,54 @@ async def serve_formula():
 
 
 # ============================================================
-# IT SUBMISSION & DASHBOARD APIS (Paste the rest of main.py here)
+# REST OF MAIN.PY LOGIC (IT Form, Dashboard, Exports)
 # ============================================================
-# ... (Keep all /api/it/submit, /api/it/get, /api/dashboard/all, etc. exactly as they are) ...
+
+def submission_to_dict(it_sub):
+    if not it_sub:
+        return {}
+    return { ... } # (Paste the dictionary fields from your main.py here)
+
+def _safe_pct(numerator, denominator, cap=None): ...
+def _safe_num(value, default=0.0): ...
+def compute_submetrics(it_sub) -> Dict[str, float]: ...
+
+def _score_dict(score): ...
+
+@app.post("/api/it/submit")
+def submit_it_form(payload: ITSubmissionIn, db: Session = Depends(get_db)): ...
+
+@app.get("/api/it/submission")
+def get_it_submission(branch: str, month: str, db: Session = Depends(get_db)): ...
+
+@app.get("/api/it/get")
+def get_it_submission_flat(branch: str, report_month: str, db: Session = Depends(get_db)): ...
+
+@app.get("/api/it/all")
+def get_all_it_submissions_for_month(month: str, db: Session = Depends(get_db)): ...
+
+@app.delete("/api/it/submission")
+def delete_it_submission(branch: str, month: str, db: Session = Depends(get_db)): ...
+
+def _recalculate_score(db: Session, branch_id: int, report_month: date): ...
+
+@app.get("/api/dashboard/branch/{branch_name}")
+def get_branch_score(branch_name: str, month: str, db: Session = Depends(get_db)): ...
+
+@app.get("/api/dashboard/all")
+def get_all_scores(month: str, db: Session = Depends(get_db)): ...
+
+@app.get("/api/export/branch/{branch_name}")
+def export_branch_month(branch_name: str, month: str, db: Session = Depends(get_db)): ...
+
+@app.get("/api/export/all")
+def export_all_branches(month: str, db: Session = Depends(get_db)): ...
+
+@app.get("/api/export/branch/{branch_name}/history")
+def export_branch_history(branch_name: str, db: Session = Depends(get_db)): ...
+
+@app.get("/api/branches")
+def get_branches(db: Session = Depends(get_db)): ...
 
 
 # ============================================================
