@@ -16,12 +16,17 @@ app = FastAPI(
 )
 
 # ============================================================
-# STATIC FILES – SERVE HTML PAGES
+# STATIC FILES – SERVE HTML PAGES (FIXED PATH FOR VERCELL)
 # ============================================================
 
-# Get the absolute path to the static folder (inside api/)
-current_dir = os.path.dirname(os.path.abspath(__file__))
-static_dir = os.path.join(current_dir, "static")
+# Vercel sets the working directory to your backend folder
+static_dir = os.path.join(os.getcwd(), "static")
+
+# Fallback if it's nested one level up (because index.py is in api/)
+if not os.path.exists(static_dir):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(current_dir)
+    static_dir = os.path.join(parent_dir, "static")
 
 # Mount the static folder so that /static/… works
 if os.path.exists(static_dir):
