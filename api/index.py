@@ -1,7 +1,6 @@
 import os
 import secrets
 from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from mangum import Mangum
@@ -12,20 +11,17 @@ from mangum import Mangum
 # from schemas import ITSubmissionIn
 # from scoring import compute_full_score
 
-app = FastAPI(title="RAACK Scorify", version="1.0.0")
+app = FastAPI(
+    title="RAACK Scorify — Smart Franchise Performance Scoring Platform",
+    version="1.0.0"
+)
 
 # ============================================================
-# STATIC FILES – POINT TO PUBLIC FOLDER (Vercel Native)
+# USE THE PUBLIC FOLDER (Fallback if API is hit directly)
 # ============================================================
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)  # Step up to backend/
+parent_dir = os.path.dirname(current_dir)  # Points to backend/
 public_dir = os.path.join(parent_dir, "public")
-
-if os.path.exists(public_dir):
-    # Vercel serves 'public' automatically, so we don't need to mount it.
-    print(f"✅ Public directory resolved to: {public_dir}")
-else:
-    print(f"⚠️ Public directory not found: {public_dir}")
 
 def _serve_page(filename: str):
     file_path = os.path.join(public_dir, filename)
@@ -34,7 +30,7 @@ def _serve_page(filename: str):
     return {"error": f"File {filename} not found"}
 
 # ============================================================
-# HTML PAGE ROUTES
+# HTML PAGE ROUTES (Vercel will usually handle these first)
 # ============================================================
 @app.get("/")
 async def serve_landing(): return _serve_page("index.html")
@@ -86,24 +82,8 @@ async def login(payload: LoginIn):
     raise HTTPException(status_code=401, detail="Invalid username or password.")
 
 # ============================================================
-# MOCK DASHBOARD APIs (So the UI loads while you test!)
+# HEALTH CHECK
 # ============================================================
-@app.get("/api/dashboard/all")
-async def get_all_scores():
-    # Temporary dummy data so the interface doesn't crash
-    return [
-        {"branch": "Kilpauk", "final_score": 780, "rating": "Excellent", "action": "", "financial_health": 200, "student_growth": 190, "operations_discipline": 120, "brand_quality": 60, "customer_experience": 65, "local_marketing": 150, "base_score": 785, "penalty": 5},
-        {"branch": "Mylapore", "final_score": 650, "rating": "Good", "action": "", "financial_health": 170, "student_growth": 160, "operations_discipline": 100, "brand_quality": 50, "customer_experience": 55, "local_marketing": 125, "base_score": 660, "penalty": 10}
-    ]
-
-@app.get("/api/dashboard/branch/{branch_name}")
-async def get_branch_score(branch_name: str, month: str):
-    return {"branch": branch_name, "rating": "Excellent", "final_score": 750, "financial_health": 190, "student_growth": 180, "operations_discipline": 110, "brand_quality": 60, "customer_experience": 60, "local_marketing": 150, "base_score": 750, "penalty": 0, "action": ""}
-
-@app.get("/api/it/get")
-async def get_it_submission_flat():
-    return {"branch": "Kilpauk", "report_month": "2026-08", "revenue_actual": 100000}
-
 @app.get("/api/health")
 async def health_check():
     return {"status": "ok", "app": "RAACK Scorify", "version": "1.0.0"}
