@@ -230,6 +230,39 @@ async def submit_it_form(payload: ITSubmissionIn, db: Session = Depends(get_db))
 
     return {"status": "ok", "message": "Submission saved.", "score": result}
 
+@app.get("/api/it/all")
+async def get_all_it_submissions(
+    month: str | None = None,
+    report_month: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """
+    Return all IT submissions for a selected month.
+
+    The frontend historically called this endpoint, but the backend did not
+    expose it. Both `month` and `report_month` are accepted so older/newer
+    frontend versions continue to work.
+    """
+    selected_month = (month or report_month or "").strip()
+    if not selected_month:
+        raise HTTPException(status_code=400, detail="Month is required (YYYY-MM).")
+
+    month_date = parse_month(selected_month)
+
+    rows = (
+        db.query(ITSubmission, Branch)
+        .join(Branch, ITSubmission.branch_id == Branch.id)
+        .filter(ITSubmission.report_month == month_date)
+        .order_by(Branch.name)
+        .all()
+    )
+
+    return [
+        it_submission_to_dict(it_sub, branch.name)
+        for it_sub, branch in rows
+    ]
+
+
 @app.get("/api/it/get")
 async def get_it_submission(branch: str, report_month: str, db: Session = Depends(get_db)):
     b = get_branch_or_404(db, branch)

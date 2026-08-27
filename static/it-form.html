@@ -986,6 +986,26 @@
       font-style: italic;
     }
 
+    .field-success {
+      border-color: #3ddc97 !important;
+      box-shadow: 0 0 0 3px rgba(61, 220, 151, 0.12);
+    }
+
+    .field-info {
+      font-size: 10.5px;
+      color: #1f8c5f;
+      margin-top: 3px;
+      display: none;
+    }
+
+    .field-info.show {
+      display: block;
+    }
+
+    .pending-count {
+      margin-left: 6px;
+    }
+
     @media(max-width:680px) {
       .desktop-only {
         display: none;
@@ -1373,8 +1393,17 @@
 
   <script>
     // ---------- Theme ----------
-    function applyTheme(t) { document.documentElement.setAttribute('data-theme', t); const btn = document.getElementById('themeToggle'); if (btn) btn.textContent = t === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'; }
-    function toggleTheme() { const current = document.documentElement.getAttribute('data-theme') || 'light'; const next = current === 'dark' ? 'light' : 'dark'; localStorage.setItem('raack_theme', next); applyTheme(next); }
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      const btn = document.getElementById('themeToggle');
+      if (btn) btn.textContent = t === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+    }
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('raack_theme', next);
+      applyTheme(next);
+    }
     applyTheme(localStorage.getItem('raack_theme') || 'light');
 
     // ---------- Generic in-page alert/confirm ----------
@@ -1385,11 +1414,13 @@
       const msgEl = document.getElementById('appAlertMessage');
       const cancelBtn = document.getElementById('appAlertCancel');
       const okBtn = document.getElementById('appAlertOk');
+
       titleEl.textContent = opts.title || (opts.showCancel ? 'Please Confirm' : 'Notice');
       msgEl.innerHTML = message;
       cancelBtn.style.display = opts.showCancel ? 'inline-block' : 'none';
       cancelBtn.textContent = opts.cancelText || 'Cancel';
       okBtn.textContent = opts.okText || 'OK';
+
       return new Promise((resolve) => {
         function cleanup(result) {
           overlay.style.display = 'none';
@@ -1401,50 +1432,93 @@
         function onOk() { cleanup(true); }
         function onCancel() { cleanup(false); }
         function onOverlayClick(e) { if (e.target === overlay) cleanup(false); }
+
         okBtn.addEventListener('click', onOk);
         cancelBtn.addEventListener('click', onCancel);
         overlay.addEventListener('click', onOverlayClick);
         overlay.style.display = 'flex';
       });
     }
-    function showAppConfirm(message, opts) { opts = opts || {}; opts.showCancel = true; return showAppAlert(message, opts); }
+
+    function showAppConfirm(message, opts) {
+      opts = opts || {};
+      opts.showCancel = true;
+      return showAppAlert(message, opts);
+    }
 
     // ---------- Generic custom combobox ----------
     function createCombobox(opts) {
       const input = document.getElementById(opts.inputId);
       const list = document.getElementById(opts.listId);
-      let items = opts.items;
+      let items = opts.items || [];
       let filtered = [];
       let activeIndex = -1;
 
       function render(query) {
         const q = (query || '').trim().toLowerCase();
-        filtered = q ? items.filter(it => opts.getLabel(it).toLowerCase().includes(q)) : items.slice();
+        filtered = q
+          ? items.filter(it => String(opts.getLabel(it)).toLowerCase().includes(q))
+          : items.slice();
+
         list.innerHTML = filtered.length
-          ? filtered.map((it, i) => `<div class="combo-option" data-idx="${i}">${opts.getLabel(it)}</div>`).join('')
+          ? filtered.map((it, i) =>
+            `<div class="combo-option" data-idx="${i}">${escapeHtml(opts.getLabel(it))}</div>`
+          ).join('')
           : '<div class="combo-empty">No matches</div>';
+
         activeIndex = -1;
         list.classList.add('show');
       }
-      function close() { list.classList.remove('show'); activeIndex = -1; }
+
+      function close() {
+        list.classList.remove('show');
+        activeIndex = -1;
+      }
+
       function highlight() {
-        const opts2 = list.querySelectorAll('.combo-option');
-        opts2.forEach((o, i) => o.classList.toggle('active', i === activeIndex));
+        const options = list.querySelectorAll('.combo-option');
+        options.forEach((o, i) => o.classList.toggle('active', i === activeIndex));
         const active = list.querySelector('.combo-option.active');
         if (active) active.scrollIntoView({ block: 'nearest' });
       }
-      function choose(it) { input.value = opts.getLabel(it); close(); if (opts.onSelect) opts.onSelect(it); }
+
+      function choose(it) {
+        input.value = opts.getLabel(it);
+        close();
+        if (opts.onSelect) opts.onSelect(it);
+      }
 
       input.addEventListener('focus', () => render(input.value));
-      input.addEventListener('input', () => render(input.value));
-      input.addEventListener('blur', () => setTimeout(close, 150));
-      input.addEventListener('keydown', (e) => {
-        if (!list.classList.contains('show')) { if (e.key === 'ArrowDown') { render(input.value); } return; }
-        if (e.key === 'ArrowDown') { e.preventDefault(); activeIndex = Math.min(activeIndex + 1, filtered.length - 1); highlight(); }
-        else if (e.key === 'ArrowUp') { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); highlight(); }
-        else if (e.key === 'Enter') { if (activeIndex >= 0 && filtered[activeIndex]) { e.preventDefault(); choose(filtered[activeIndex]); } }
-        else if (e.key === 'Escape') { close(); }
+      input.addEventListener('input', () => {
+        render(input.value);
+        if (opts.onInput) opts.onInput(input.value);
       });
+      input.addEventListener('blur', () => setTimeout(close, 150));
+
+      input.addEventListener('keydown', (e) => {
+        if (!list.classList.contains('show')) {
+          if (e.key === 'ArrowDown') render(input.value);
+          return;
+        }
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          activeIndex = Math.min(activeIndex + 1, filtered.length - 1);
+          highlight();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          activeIndex = Math.max(activeIndex - 1, 0);
+          highlight();
+        } else if (e.key === 'Enter') {
+          if (activeIndex >= 0 && filtered[activeIndex]) {
+            e.preventDefault();
+            choose(filtered[activeIndex]);
+          }
+        } else if (e.key === 'Escape') {
+          close();
+        }
+      });
+
       list.addEventListener('mousedown', (e) => {
         const opt = e.target.closest('.combo-option');
         if (!opt) return;
@@ -1452,47 +1526,131 @@
         const idx = parseInt(opt.dataset.idx, 10);
         if (filtered[idx]) choose(filtered[idx]);
       });
-      return { refreshItems(newItems) { items = newItems; } };
+
+      return {
+        refreshItems(newItems) { items = newItems || []; }
+      };
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     // ---------- Branches ----------
     const branches = ["Kilpauk", "Mylapore", "Velachery", "Cuddalore", "Tambaram", "Mogappair", "Thoraipakkam", "Avadi", "Keelkattalai", "Mugalivakkam", "Sholinganallur", "Neelankarai", "Kolathur", "Pallikaranai", "Old Perungalathur", "Guduvanchery", "Puduchery", "Ramapuram", "Saidapet", "Old Pallavaram", "Mannivakkam", "Chidambaram", "Hasthinapuram", "Thiruverkadu", "Surapet", "Maraimalai Nagar", "Padur", "Medavakkam", "Ambattur", "Arumbakkam", "Ayapakkam", "Sithalapakkam", "Perumbakkam", "Basavanagudi", "Pudupakkam", "Urapakkam", "Thanjavur", "Pammal", "Kumbakonam", "Maduravoyal", "Kandigai", "Kundrathur", "Madambakkam", "Navalur", "Kelambakkam", "Iyyapanthangal", "Mappedu"];
 
-    createCombobox({ inputId: 'branch', listId: 'branchList', items: branches, getLabel: b => b, onSelect: () => triggerCheck() });
-    createCombobox({ inputId: 'filterBranch', listId: 'filterBranchList', items: branches, getLabel: b => b, onSelect: () => renderRecordsTable() });
+    createCombobox({
+      inputId: 'branch',
+      listId: 'branchList',
+      items: branches,
+      getLabel: b => b,
+      onSelect: () => triggerCheck()
+    });
+
+    createCombobox({
+      inputId: 'filterBranch',
+      listId: 'filterBranchList',
+      items: branches,
+      getLabel: b => b,
+      onSelect: () => renderRecordsTable()
+    });
 
     // ---------- Months ----------
-    const MONTHS = [{ value: '2026-01', label: 'January 2026' }, { value: '2026-02', label: 'February 2026' }, { value: '2026-03', label: 'March 2026' }, { value: '2026-04', label: 'April 2026' }, { value: '2026-05', label: 'May 2026' }, { value: '2026-06', label: 'June 2026' }, { value: '2026-07', label: 'July 2026' }, { value: '2026-08', label: 'August 2026' }, { value: '2026-09', label: 'September 2026' }, { value: '2026-10', label: 'October 2026' }, { value: '2026-11', label: 'November 2026' }, { value: '2026-12', label: 'December 2026' }];
-    function monthLabel(value) { const m = MONTHS.find(x => x.value === value); return m ? m.label : (value || ''); }
-    function syncMonthDisplayFromValue(hiddenId, displayId) { const hidden = document.getElementById(hiddenId); const display = document.getElementById(displayId); if (hidden && display) display.value = monthLabel(hidden.value); }
-    syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay'); syncMonthDisplayFromValue('filterMonth', 'filterMonthDisplay');
+    const MONTHS = [
+      { value: '2026-01', label: 'January 2026' },
+      { value: '2026-02', label: 'February 2026' },
+      { value: '2026-03', label: 'March 2026' },
+      { value: '2026-04', label: 'April 2026' },
+      { value: '2026-05', label: 'May 2026' },
+      { value: '2026-06', label: 'June 2026' },
+      { value: '2026-07', label: 'July 2026' },
+      { value: '2026-08', label: 'August 2026' },
+      { value: '2026-09', label: 'September 2026' },
+      { value: '2026-10', label: 'October 2026' },
+      { value: '2026-11', label: 'November 2026' },
+      { value: '2026-12', label: 'December 2026' }
+    ];
 
-    // ---------- QUARTERLY FIELD LOGIC ----------
+    function monthLabel(value) {
+      const m = MONTHS.find(x => x.value === value);
+      return m ? m.label : (value || '');
+    }
+
+    function syncMonthDisplayFromValue(hiddenId, displayId) {
+      const hidden = document.getElementById(hiddenId);
+      const display = document.getElementById(displayId);
+      if (hidden && display) display.value = monthLabel(hidden.value);
+    }
+
+    syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay');
+    syncMonthDisplayFromValue('filterMonth', 'filterMonthDisplay');
+
+    createCombobox({
+      inputId: 'reportMonthDisplay',
+      listId: 'reportMonthList',
+      items: MONTHS,
+      getLabel: m => m.label,
+      onSelect: (m) => {
+        document.getElementById('reportMonth').value = m.value;
+        updateQuarterlyFields();
+        triggerCheck();
+        updatePendingStatus();
+      }
+    });
+
+    createCombobox({
+      inputId: 'filterMonthDisplay',
+      listId: 'filterMonthList',
+      items: MONTHS,
+      getLabel: m => m.label,
+      onSelect: (m) => {
+        document.getElementById('filterMonth').value = m.value;
+        renderRecordsTable();
+      }
+    });
+
+    // ---------- Quarterly field logic ----------
+    // These fields are required only once every quarter:
+    // March, June, September and December.
+    const QUARTERLY_FIELDS = [
+      'brandingCompliance',
+      'mysteryAuditScore',
+      'satisfactionScore'
+    ];
+
     function isQuarterStart(monthStr) {
       if (!monthStr) return false;
       const month = parseInt(monthStr.split('-')[1], 10);
-      return [6, 9, 12, 3].includes(month);
+      return [3, 6, 9, 12].includes(month);
     }
 
     function updateQuarterlyFields() {
       const month = document.getElementById('reportMonth').value;
       const isQS = isQuarterStart(month);
-      const quarterlyFields = ['brandingCompliance', 'mysteryAuditScore', 'satisfactionScore'];
-      quarterlyFields.forEach(id => {
+
+      QUARTERLY_FIELDS.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
+
         if (isQS) {
           el.disabled = false;
           el.classList.remove('field-quarterly-inactive');
-          // Remove the "read-only" feel
           el.style.background = '';
           el.style.cursor = '';
         } else {
           el.disabled = true;
           el.classList.add('field-quarterly-inactive');
-          // Ensure the value is still displayed but greyed out
+          el.style.background = '';
+          el.style.cursor = 'not-allowed';
         }
       });
+
+      updatePendingStatus();
     }
 
     // ---------- Helpers ----------
@@ -1500,41 +1658,400 @@
     const getNum = (id) => Math.max(0, parseFloat(getVal(id)) || 0);
     const getInt = (id) => Math.max(0, parseInt(getVal(id)) || 0);
 
-    // Updated: removed batchUtilization, trainerAttendance, hygieneScore, curriculumCompliance, trainerCertification
-    const PERCENT_FIELD_IDS = ['feeCollectionRate', 'operatingMargin', 'attendanceRecording', 'crmUsage', 'reportSubmission', 'brandingCompliance', 'mysteryAuditScore', 'satisfactionScore', 'eventSatisfaction'];
+    const PERCENT_FIELD_IDS = [
+      'feeCollectionRate',
+      'operatingMargin',
+      'attendanceRecording',
+      'crmUsage',
+      'reportSubmission',
+      'brandingCompliance',
+      'mysteryAuditScore',
+      'satisfactionScore',
+      'eventSatisfaction'
+    ];
 
-    function flashWarning(id) { const warn = document.getElementById(id + '-warn'); const el = document.getElementById(id); if (!el) return; el.classList.add('field-invalid'); if (warn) warn.classList.add('show'); clearTimeout(el._warnTimer); el._warnTimer = setTimeout(() => { el.classList.remove('field-invalid'); if (warn) warn.classList.remove('show'); }, 1400); }
+    const RELATIVE_CLAMPS = [
+      ['tshirtPaid', 'tshirtDue'],
+      ['salaryPaid', 'salaryDue'],
+      ['hotelPaid', 'hotelDue'],
+      ['merchPaid', 'merchDue'],
+      ['complaintsResolved', 'complaintsReceived']
+    ];
 
-    function clampToOwnBounds(el) { if (el.value === '') return; const min = el.min !== '' ? parseFloat(el.min) : null; const max = el.max !== '' ? parseFloat(el.max) : null; let v = parseFloat(el.value); if (isNaN(v)) return; let changed = false; if (min !== null && v < min) { v = min; changed = true; } if (max !== null && v > max) { v = max; changed = true; } if (changed) { el.value = v; flashWarning(el.id); } }
-    document.querySelectorAll('#itForm input[type="number"][max]').forEach(el => { if (PERCENT_FIELD_IDS.includes(el.id)) return; el.addEventListener('input', () => clampToOwnBounds(el)); el.addEventListener('blur', () => clampToOwnBounds(el)); });
+    function flashWarning(id, message) {
+      const warn = document.getElementById(id + '-warn');
+      const el = document.getElementById(id);
+      if (!el) return;
 
-    // Updated: removed trialConversions/trialsConducted and classesConducted/classesPlanned
-    const RELATIVE_CLAMPS = [['tshirtPaid', 'tshirtDue'], ['salaryPaid', 'salaryDue'], ['hotelPaid', 'hotelDue'], ['merchPaid', 'merchDue'], ['complaintsResolved', 'complaintsReceived']];
-    function clampRelative(fieldId, boundId) { const field = document.getElementById(fieldId); const bound = document.getElementById(boundId); if (!field || !bound) return; if (field.value === '') return; const max = parseFloat(bound.value) || 0; const v = parseFloat(field.value); if (isNaN(v)) return; if (v > max) { field.value = max; flashWarning(fieldId); } }
-    RELATIVE_CLAMPS.forEach(([fieldId, boundId]) => { const field = document.getElementById(fieldId); const bound = document.getElementById(boundId); if (!field || !bound) return; field.addEventListener('input', () => clampRelative(fieldId, boundId)); field.addEventListener('blur', () => clampRelative(fieldId, boundId)); bound.addEventListener('input', () => clampRelative(fieldId, boundId)); bound.addEventListener('blur', () => clampRelative(fieldId, boundId)); });
+      el.classList.add('field-invalid');
+      if (warn) {
+        if (message) warn.textContent = message;
+        warn.classList.add('show');
+      }
 
-    function clampPercentValue(el) { if (!el || el.value === '') return; const raw = parseFloat(el.value); if (isNaN(raw)) return; let v = Math.round(raw); if (v < 0) v = 0; if (v > 100) v = 100; if (v !== raw) { el.value = v; flashWarning(el.id); } }
-    PERCENT_FIELD_IDS.forEach(id => { const el = document.getElementById(id); if (!el) return; el.addEventListener('input', () => clampPercentValue(el)); el.addEventListener('blur', () => clampPercentValue(el)); });
+      clearTimeout(el._warnTimer);
+      el._warnTimer = setTimeout(() => {
+        el.classList.remove('field-invalid');
+        if (warn) warn.classList.remove('show');
+      }, 1800);
+    }
 
-    function clampDropouts() { const opening = parseFloat(getVal('openingStudents')) || 0; const newEnroll = parseFloat(getVal('newEnrollments')) || 0; const dropoutsEl = document.getElementById('dropouts'); if (dropoutsEl.value === '') return; const max = opening + newEnroll; const v = parseFloat(dropoutsEl.value); if (isNaN(v)) return; if (v > max) { dropoutsEl.value = max; flashWarning('dropouts'); } }
-    ['dropouts', 'openingStudents', 'newEnrollments'].forEach(id => { const el = document.getElementById(id); el.addEventListener('input', clampDropouts); el.addEventListener('blur', clampDropouts); });
+    function markFieldFilled(id, message) {
+      const el = document.getElementById(id);
+      if (!el) return;
 
-    document.getElementById('googleRating').addEventListener('input', function () { const v = parseFloat(this.value); if (!isNaN(v) && (v < 1 || v > 5)) { flashWarning('googleRating'); } else { this.classList.remove('field-invalid'); document.getElementById('googleRating-warn').classList.remove('show'); } });
+      const hasValue = el.value !== '' && el.value !== null;
+      if (hasValue && !el.disabled) {
+        el.classList.add('field-success');
+      } else {
+        el.classList.remove('field-success');
+      }
 
-    function resetFormToZero() { const form = document.getElementById('itForm'); form.querySelectorAll('input[type="number"]').forEach(input => { input.value = 0; }); form.querySelectorAll('input[type="text"]').forEach(input => { input.value = ''; }); document.getElementById('googleRating').value = 1; document.getElementById('branch').value = ''; document.getElementById('unauthorizedDiscount').value = 'No'; document.getElementById('falseReporting').value = 'No'; document.getElementById('trainerMisconduct').value = 'No'; document.getElementById('reportMonth').value = '2026-08'; syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay'); document.body.classList.remove('editing'); document.getElementById('editStatus').classList.remove('show'); }
-    function showSuccess(message) { const successMsg = document.getElementById('successMsg'); const errorMsg = document.getElementById('errorMsg'); errorMsg.classList.remove('show'); successMsg.textContent = `✅ ${message}`; successMsg.classList.add('show'); }
-    function showError(message) { const successMsg = document.getElementById('successMsg'); const errorMsg = document.getElementById('errorMsg'); successMsg.classList.remove('show'); errorMsg.textContent = `❌ ${message}`; errorMsg.classList.add('show'); }
+      let info = document.getElementById(id + '-info');
+      if (message) {
+        if (!info) {
+          info = document.createElement('div');
+          info.id = id + '-info';
+          info.className = 'field-info';
+          el.parentElement.appendChild(info);
+        }
+        info.textContent = message;
+        info.classList.toggle('show', hasValue && !el.disabled);
+      }
+    }
 
-    // ---------- Payload & Fill (updated) ----------
+    function clampToOwnBounds(el) {
+      if (!el || el.value === '') return;
+
+      const min = el.min !== '' ? parseFloat(el.min) : null;
+      const max = el.max !== '' ? parseFloat(el.max) : null;
+      let v = parseFloat(el.value);
+      if (isNaN(v)) return;
+
+      let changed = false;
+
+      if (min !== null && v < min) {
+        v = min;
+        changed = true;
+      }
+
+      if (max !== null && v > max) {
+        v = max;
+        changed = true;
+      }
+
+      if (changed) {
+        el.value = v;
+        flashWarning(el.id, `Value must be between ${min ?? 0} and ${max ?? 'the allowed maximum'}.`);
+      }
+
+      markFieldFilled(el.id);
+      updatePendingStatus();
+    }
+
+    function clampPercentValue(el) {
+      if (!el || el.value === '') return;
+
+      const raw = parseFloat(el.value);
+      if (isNaN(raw)) return;
+
+      let v = raw;
+      if (v < 0) v = 0;
+      if (v > 100) v = 100;
+
+      if (v !== raw) {
+        el.value = v;
+        flashWarning(el.id, 'Percentage cannot be below 0% or above 100%.');
+      }
+
+      markFieldFilled(el.id);
+      updatePendingStatus();
+    }
+
+    function clampRelative(fieldId, boundId) {
+      const field = document.getElementById(fieldId);
+      const bound = document.getElementById(boundId);
+      if (!field || !bound || field.value === '') return;
+
+      const max = Math.max(0, parseFloat(bound.value) || 0);
+      const v = parseFloat(field.value);
+      if (isNaN(v)) return;
+
+      if (v > max) {
+        field.value = max;
+        flashWarning(
+          fieldId,
+          `${field.getAttribute('aria-label') || field.previousElementSibling?.textContent || 'Value'} cannot exceed ${bound.previousElementSibling?.textContent || 'the due/received amount'}. Value set to ${max}.`
+        );
+      }
+
+      markFieldFilled(fieldId);
+      updatePendingStatus();
+    }
+
+    function clampDropouts() {
+      const opening = parseFloat(getVal('openingStudents')) || 0;
+      const newEnroll = parseFloat(getVal('newEnrollments')) || 0;
+      const dropoutsEl = document.getElementById('dropouts');
+
+      if (!dropoutsEl || dropoutsEl.value === '') return;
+
+      const max = opening + newEnroll;
+      const v = parseFloat(dropoutsEl.value);
+      if (isNaN(v)) return;
+
+      if (v > max) {
+        dropoutsEl.value = max;
+        flashWarning('dropouts', `Dropouts cannot exceed Opening Students + New Paid Admissions (${max}).`);
+      }
+
+      markFieldFilled('dropouts');
+      updatePendingStatus();
+    }
+
+    function attachValidationListeners() {
+      document.querySelectorAll('#itForm input[type="number"]').forEach(el => {
+        el.addEventListener('input', () => {
+          if (PERCENT_FIELD_IDS.includes(el.id)) clampPercentValue(el);
+          else clampToOwnBounds(el);
+        });
+        el.addEventListener('blur', () => {
+          if (PERCENT_FIELD_IDS.includes(el.id)) clampPercentValue(el);
+          else clampToOwnBounds(el);
+        });
+      });
+
+      RELATIVE_CLAMPS.forEach(([fieldId, boundId]) => {
+        const field = document.getElementById(fieldId);
+        const bound = document.getElementById(boundId);
+        if (!field || !bound) return;
+
+        field.addEventListener('input', () => clampRelative(fieldId, boundId));
+        field.addEventListener('blur', () => clampRelative(fieldId, boundId));
+        bound.addEventListener('input', () => clampRelative(fieldId, boundId));
+        bound.addEventListener('blur', () => clampRelative(fieldId, boundId));
+      });
+
+      ['dropouts', 'openingStudents', 'newEnrollments'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', clampDropouts);
+        el.addEventListener('blur', clampDropouts);
+      });
+
+      const google = document.getElementById('googleRating');
+      if (google) {
+        google.addEventListener('input', function () {
+          const v = parseFloat(this.value);
+
+          if (!isNaN(v) && (v < 1 || v > 5)) {
+            this.value = Math.min(5, Math.max(1, v));
+            flashWarning('googleRating', 'Google Rating must be between 1 and 5.');
+          }
+
+          markFieldFilled('googleRating');
+          updatePendingStatus();
+        });
+      }
+
+      document.querySelectorAll('#itForm input, #itForm select').forEach(el => {
+        el.addEventListener('input', updatePendingStatus);
+        el.addEventListener('change', updatePendingStatus);
+      });
+    }
+
+    // ---------- Quarterly "filled" + pending logic ----------
+    // Monthly fields are expected every month.
+    // Quarterly fields are expected only in Mar/Jun/Sep/Dec.
+    const MONTHLY_REQUIRED_FIELDS = [
+      'revenueTarget',
+      'revenueActual',
+      'tshirtDue',
+      'tshirtPaid',
+      'salaryDue',
+      'salaryPaid',
+      'hotelDue',
+      'hotelPaid',
+      'merchDue',
+      'merchPaid',
+      'feeCollectionRate',
+      'operatingMargin',
+      'openingStudents',
+      'newStudentTarget',
+      'newEnrollments',
+      'dropouts',
+      'closingStudents',
+      'attendanceRecording',
+      'crmUsage',
+      'reportSubmission',
+      'googleRating',
+      'complaintsReceived',
+      'complaintsResolved',
+      'referrals',
+      'eventSatisfaction',
+      'marketingActivities',
+      'partnerships'
+    ];
+
+    function fieldIsFilled(id) {
+      const el = document.getElementById(id);
+      if (!el || el.disabled) return true;
+      return el.value !== '' && el.value !== null && String(el.value).trim() !== '';
+    }
+
+    function getPendingFields() {
+      const pending = [];
+      const month = getVal('reportMonth');
+
+      MONTHLY_REQUIRED_FIELDS.forEach(id => {
+        if (!fieldIsFilled(id)) pending.push(id);
+      });
+
+      if (isQuarterStart(month)) {
+        QUARTERLY_FIELDS.forEach(id => {
+          if (!fieldIsFilled(id)) pending.push(id);
+        });
+      }
+
+      return pending;
+    }
+
+    const FIELD_LABELS = {
+      revenueTarget: 'Revenue Target',
+      revenueActual: 'Revenue Achieved',
+      tshirtDue: 'T-shirt/Uniform Due',
+      tshirtPaid: 'T-shirt/Uniform Paid',
+      salaryDue: 'Instructor Salary Due',
+      salaryPaid: 'Instructor Salary Paid',
+      hotelDue: 'Hotel/Accommodation Due',
+      hotelPaid: 'Hotel/Accommodation Paid',
+      merchDue: 'Merchandise Due',
+      merchPaid: 'Merchandise Paid',
+      feeCollectionRate: 'Fee Collection',
+      operatingMargin: 'Operating Margin',
+      openingStudents: 'Opening Students',
+      newStudentTarget: 'New Admission Target',
+      newEnrollments: 'New Paid Admissions',
+      dropouts: 'Dropouts',
+      closingStudents: 'Closing Students',
+      attendanceRecording: 'Attendance Recording',
+      crmUsage: 'CRM/App Usage',
+      reportSubmission: 'Report Submission',
+      brandingCompliance: 'Branding/Signage',
+      mysteryAuditScore: 'Audit/Mystery Visit',
+      satisfactionScore: 'Satisfaction Score',
+      googleRating: 'Google Rating',
+      complaintsReceived: 'Complaints Received',
+      complaintsResolved: 'Complaints Resolved',
+      referrals: 'Referrals',
+      eventSatisfaction: 'Event Satisfaction',
+      marketingActivities: 'Marketing Activities',
+      partnerships: 'Partnerships'
+    };
+
+    function updatePendingStatus() {
+      const pending = getPendingFields();
+
+      QUARTERLY_FIELDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        const quarterActive = isQuarterStart(getVal('reportMonth'));
+        if (quarterActive && fieldIsFilled(id)) {
+          markFieldFilled(id, '✓ Filled for this quarter');
+        } else {
+          el.classList.remove('field-success');
+          const info = document.getElementById(id + '-info');
+          if (info) info.classList.remove('show');
+        }
+      });
+
+      const submitBtn = document.getElementById('submitBtn');
+      if (submitBtn) {
+        submitBtn.title = pending.length
+          ? `${pending.length} item(s) still pending`
+          : 'All required fields are filled';
+      }
+    }
+
+    function pendingItemsHtml() {
+      const pending = getPendingFields();
+      if (!pending.length) {
+        return '<p class="missing-empty">✅ No pending form fields for the selected month.</p>';
+      }
+
+      return `<ul>${pending.map((id, idx) =>
+        `<li><span class="missing-num">${idx + 1}.</span><span>•</span><span>${escapeHtml(FIELD_LABELS[id] || id)}</span></li>`
+      ).join('')}</ul>`;
+    }
+
+    function resetFormToZero() {
+      const form = document.getElementById('itForm');
+
+      form.querySelectorAll('input[type="number"]').forEach(input => {
+        input.value = input.id === 'googleRating' ? 1 : 0;
+      });
+
+      form.querySelectorAll('input[type="text"]').forEach(input => {
+        input.value = '';
+      });
+
+      document.getElementById('branch').value = '';
+      document.getElementById('unauthorizedDiscount').value = 'No';
+      document.getElementById('falseReporting').value = 'No';
+      document.getElementById('trainerMisconduct').value = 'No';
+
+      document.getElementById('reportMonth').value = '2026-08';
+      syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay');
+
+      document.body.classList.remove('editing');
+      document.getElementById('editStatus').classList.remove('show');
+
+      form.querySelectorAll('input').forEach(el => {
+        el.classList.remove('field-success', 'field-invalid');
+      });
+
+      form.querySelectorAll('.field-info').forEach(el => el.remove());
+
+      updateQuarterlyFields();
+      updatePendingStatus();
+    }
+
+    function showSuccess(message) {
+      const successMsg = document.getElementById('successMsg');
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.classList.remove('show');
+      successMsg.textContent = `✅ ${message}`;
+      successMsg.classList.add('show');
+    }
+
+    function showError(message) {
+      const successMsg = document.getElementById('successMsg');
+      const errorMsg = document.getElementById('errorMsg');
+      successMsg.classList.remove('show');
+      errorMsg.textContent = `❌ ${message}`;
+      errorMsg.classList.add('show');
+    }
+
+    // ---------- Payload ----------
     function createPayload() {
-      document.querySelectorAll('#itForm input[type="number"][max]').forEach(el => { if (PERCENT_FIELD_IDS.includes(el.id)) clampPercentValue(el); else clampToOwnBounds(el); });
+      document.querySelectorAll('#itForm input[type="number"][max]').forEach(el => {
+        if (PERCENT_FIELD_IDS.includes(el.id)) clampPercentValue(el);
+        else clampToOwnBounds(el);
+      });
+
       RELATIVE_CLAMPS.forEach(([fieldId, boundId]) => clampRelative(fieldId, boundId));
       clampDropouts();
+
+      const month = getVal('reportMonth');
+
       return {
         branch: getVal('branch'),
-        report_month: getVal('reportMonth'),
+        report_month: month,
+
         revenue_target: getNum('revenueTarget'),
         revenue_actual: getNum('revenueActual'),
+
         tshirt_due: getNum('tshirtDue'),
         tshirt_paid: getNum('tshirtPaid'),
         salary_due: getNum('salaryDue'),
@@ -1543,26 +2060,34 @@
         hotel_paid: getNum('hotelPaid'),
         merch_due: getNum('merchDue'),
         merch_paid: getNum('merchPaid'),
+
         fee_collection_rate: getNum('feeCollectionRate') / 100,
         operating_margin: getNum('operatingMargin') / 100,
+
         opening_students: getInt('openingStudents'),
         new_student_target: getInt('newStudentTarget'),
         new_enrollments: getInt('newEnrollments'),
         dropouts: getInt('dropouts'),
-        closing_students: getInt('closingStudents'), // kept
+        closing_students: getInt('closingStudents'),
+
         attendance_recording: getNum('attendanceRecording') / 100,
         crm_usage: getNum('crmUsage') / 100,
         report_submission: getNum('reportSubmission') / 100,
-        branding_compliance: getNum('brandingCompliance') / 100,
-        mystery_audit_score: getNum('mysteryAuditScore') / 100,
-        satisfaction_score: getNum('satisfactionScore') / 100,
+
+        // Quarterly fields are submitted only when the selected month is a quarter month.
+        branding_compliance: isQuarterStart(month) ? getNum('brandingCompliance') / 100 : 0,
+        mystery_audit_score: isQuarterStart(month) ? getNum('mysteryAuditScore') / 100 : 0,
+        satisfaction_score: isQuarterStart(month) ? getNum('satisfactionScore') / 100 : 0,
+
         google_rating: getNum('googleRating'),
         complaints_received: getInt('complaintsReceived'),
         complaints_resolved: getInt('complaintsResolved'),
         referrals: getInt('referrals'),
         event_satisfaction: getNum('eventSatisfaction') / 100,
+
         marketing_activities: getInt('marketingActivities'),
         partnerships: getInt('partnerships'),
+
         unauthorized_discount: getVal('unauthorizedDiscount'),
         false_reporting: getVal('falseReporting'),
         trainer_misconduct: getVal('trainerMisconduct'),
@@ -1570,6 +2095,7 @@
       };
     }
 
+    // ---------- Fill ----------
     function fillForm(data) {
       const map = {
         revenue_target: 'revenueTarget',
@@ -1593,15 +2119,23 @@
         marketing_activities: 'marketingActivities',
         partnerships: 'partnerships'
       };
+
       if (data.branch) document.getElementById('branch').value = data.branch;
-      if (data.report_month) { document.getElementById('reportMonth').value = data.report_month; syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay'); }
+
+      if (data.report_month) {
+        document.getElementById('reportMonth').value = data.report_month;
+        syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay');
+      }
+
       Object.keys(map).forEach(key => {
         const element = document.getElementById(map[key]);
         if (!element) return;
+
         if (data[key] !== undefined && data[key] !== null) {
           element.value = Math.max(0, Number(data[key]) || 0);
         }
       });
+
       const percentageFields = {
         fee_collection_rate: 'feeCollectionRate',
         operating_margin: 'operatingMargin',
@@ -1613,6 +2147,7 @@
         satisfaction_score: 'satisfactionScore',
         event_satisfaction: 'eventSatisfaction'
       };
+
       Object.keys(percentageFields).forEach(key => {
         const element = document.getElementById(percentageFields[key]);
         if (element && data[key] !== undefined && data[key] !== null) {
@@ -1620,59 +2155,174 @@
           element.value = String(Math.round(raw));
         }
       });
+
       if (data.google_rating !== undefined && data.google_rating !== null) {
-        document.getElementById('googleRating').value = Math.min(5, Math.max(1, Number(data.google_rating) || 1));
+        document.getElementById('googleRating').value =
+          Math.min(5, Math.max(1, Number(data.google_rating) || 1));
       }
-      if (data.unauthorized_discount) document.getElementById('unauthorizedDiscount').value = data.unauthorized_discount;
-      if (data.false_reporting) document.getElementById('falseReporting').value = data.false_reporting;
-      if (data.trainer_misconduct) document.getElementById('trainerMisconduct').value = data.trainer_misconduct;
-      if (data.comments !== undefined) document.getElementById('comments').value = data.comments || '';
-      document.querySelectorAll('#itForm input[type="number"][max]').forEach(el => { if (PERCENT_FIELD_IDS.includes(el.id)) clampPercentValue(el); else clampToOwnBounds(el); });
+
+      if (data.unauthorized_discount) {
+        document.getElementById('unauthorizedDiscount').value = data.unauthorized_discount;
+      }
+      if (data.false_reporting) {
+        document.getElementById('falseReporting').value = data.false_reporting;
+      }
+      if (data.trainer_misconduct) {
+        document.getElementById('trainerMisconduct').value = data.trainer_misconduct;
+      }
+      if (data.comments !== undefined) {
+        document.getElementById('comments').value = data.comments || '';
+      }
+
+      document.querySelectorAll('#itForm input[type="number"][max]').forEach(el => {
+        if (PERCENT_FIELD_IDS.includes(el.id)) clampPercentValue(el);
+        else clampToOwnBounds(el);
+      });
+
       RELATIVE_CLAMPS.forEach(([fieldId, boundId]) => clampRelative(fieldId, boundId));
       clampDropouts();
-      // Apply quarterly field state
+
       updateQuarterlyFields();
+
+      // Explicitly show which quarterly fields are filled.
+      QUARTERLY_FIELDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        if (isQuarterStart(data.report_month) && el.value !== '') {
+          markFieldFilled(id, '✓ Filled for this quarter');
+        }
+      });
+
+      updatePendingStatus();
     }
 
-    // ---------- Load into form (API) ----------
+    // ---------- Load into form ----------
     async function loadIntoForm(branch, month, opts) {
       opts = opts || {};
       const btn = opts.button || null;
       const originalText = btn ? btn.textContent : null;
-      if (btn) { btn.disabled = true; btn.textContent = '⏳ Loading...'; }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ Loading...';
+      }
+
       try {
         const url = `/api/it/get?branch=${encodeURIComponent(branch)}&report_month=${encodeURIComponent(month)}`;
         const response = await fetch(url);
+
         if (!response.ok) {
           let message = `No saved data found for ${branch} — ${month}.`;
-          try { const error = await response.json(); message = error.detail || message; } catch (parseErr) { }
+          try {
+            const error = await response.json();
+            message = error.detail || message;
+          } catch (parseErr) { }
           console.error('loadIntoForm failed:', response.status, url);
           showError(message);
           return false;
         }
+
         const data = await response.json();
-        console.log('loadIntoForm: received', data);
         fillForm(data);
+
         document.body.classList.add('editing');
         document.getElementById('editStatus').classList.add('show');
-        showSuccess(`Existing data loaded for ${branch} — ${month}. You can edit and submit.`);
+        showSuccess(`Existing data loaded for ${branch} — ${monthLabel(month)}. You can edit and submit.`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return true;
+
       } catch (error) {
         console.error('loadIntoForm network error:', error);
         showError(error.message || 'Unable to load saved data. Check your connection or backend.');
         return false;
+
       } finally {
-        if (btn) { btn.disabled = false; btn.textContent = originalText; }
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
       }
     }
 
-    // ---------- Global records cache ----------
+    // ---------- Records cache ----------
     let allRecords = [];
+    let recordsRequestId = 0;
+
+    function normaliseRecord(r) {
+      if (!r || typeof r !== 'object') return null;
+
+      // Backend variations are normal because apparently APIs enjoy making us guess.
+      const copy = { ...r };
+
+      if (!copy.report_month) {
+        copy.report_month = copy.month || copy.reporting_month || copy.reportMonth || '';
+      }
+
+      if (!copy.branch) {
+        copy.branch = copy.branch_name || copy.branchName || '';
+      }
+
+      return copy;
+    }
+
+    function extractRows(payload) {
+      if (Array.isArray(payload)) return payload.map(normaliseRecord).filter(Boolean);
+
+      if (payload && Array.isArray(payload.records)) {
+        return payload.records.map(normaliseRecord).filter(Boolean);
+      }
+
+      if (payload && Array.isArray(payload.data)) {
+        return payload.data.map(normaliseRecord).filter(Boolean);
+      }
+
+      if (payload && payload.record && typeof payload.record === 'object') {
+        return [normaliseRecord(payload.record)].filter(Boolean);
+      }
+
+      return [];
+    }
+
+    async function fetchAllRecords(month) {
+      // Primary endpoint used by the current backend.
+      const urls = [
+        `/api/it/all?month=${encodeURIComponent(month)}`,
+        // Fallback for backends that use report_month instead of month.
+        `/api/it/all?report_month=${encodeURIComponent(month)}`
+      ];
+
+      let lastError = null;
+
+      for (const url of urls) {
+        try {
+          const response = await fetch(url, { cache: 'no-store' });
+
+          if (!response.ok) {
+            lastError = new Error(`HTTP ${response.status} from ${url}`);
+            continue;
+          }
+
+          const payload = await response.json();
+          const rows = extractRows(payload);
+
+          // If endpoint returned valid JSON but zero rows, keep it as a valid answer.
+          return rows;
+        } catch (err) {
+          lastError = err;
+        }
+      }
+
+      throw lastError || new Error('Unable to load submitted records.');
+    }
 
     function findExistingRecord(branch, month) {
       if (!allRecords || allRecords.length === 0) return null;
-      return allRecords.find(r => r.branch === branch && r.report_month === month) || null;
+
+      return allRecords.find(r =>
+        String(r.branch || '').trim().toLowerCase() === String(branch || '').trim().toLowerCase() &&
+        String(r.report_month || '') === String(month || '')
+      ) || null;
     }
 
     // ---------- Confirmation Popup ----------
@@ -1682,16 +2332,25 @@
     function showConfirmPopup(record, source) {
       pendingRecord = record;
       pendingSource = source || 'formCheck';
+
       const overlay = document.getElementById('confirmPopup');
       const title = document.getElementById('confirmTitle');
       const msg = document.getElementById('confirmMessage');
+
       if (source === 'tableEdit') {
         title.textContent = '📂 Load Record?';
-        msg.innerHTML = `Load the record for <strong>${record.branch}</strong> – <strong>${monthLabel(record.report_month)}</strong> into the form?<br><span style="font-size:13px;color:var(--grey-500);">Any unsaved changes will be lost.</span>`;
+        msg.innerHTML =
+          `Load the record for <strong>${escapeHtml(record.branch)}</strong> – ` +
+          `<strong>${escapeHtml(monthLabel(record.report_month))}</strong> into the form?` +
+          `<br><span style="font-size:13px;color:var(--grey-500);">Any unsaved changes will be lost.</span>`;
       } else {
         title.textContent = '📝 Record Exists';
-        msg.innerHTML = `A record already exists for <strong>${record.branch}</strong> – <strong>${monthLabel(record.report_month)}</strong>.<br>Do you want to edit it?`;
+        msg.innerHTML =
+          `A record already exists for <strong>${escapeHtml(record.branch)}</strong> – ` +
+          `<strong>${escapeHtml(monthLabel(record.report_month))}</strong>.<br>` +
+          `Do you want to edit it?`;
       }
+
       overlay.style.display = 'flex';
     }
 
@@ -1699,8 +2358,10 @@
       document.getElementById('confirmPopup').style.display = 'none';
       pendingRecord = null;
     });
+
     document.getElementById('confirmYes').addEventListener('click', function () {
       document.getElementById('confirmPopup').style.display = 'none';
+
       if (pendingRecord) {
         fillForm(pendingRecord);
         document.body.classList.add('editing');
@@ -1718,17 +2379,16 @@
       }
     });
 
-    // ---------- Check for existing record ----------
+    // ---------- Check existing ----------
     function checkForExisting() {
       const branch = document.getElementById('branch').value.trim();
       const month = document.getElementById('reportMonth').value;
+
       if (!branch || !month) return;
       if (document.body.classList.contains('editing')) return;
 
       const existing = findExistingRecord(branch, month);
-      if (existing) {
-        showConfirmPopup(existing, 'formCheck');
-      }
+      if (existing) showConfirmPopup(existing, 'formCheck');
     }
 
     const branchInput = document.getElementById('branch');
@@ -1742,36 +2402,59 @@
     branchInput.addEventListener('blur', function () {
       if (this.value.trim()) triggerCheck();
     });
+
     monthDisplay.addEventListener('change', function () {
-      triggerCheck();
-      // Also update quarterly field state when month changes
       updateQuarterlyFields();
+      triggerCheck();
+      updatePendingStatus();
     });
+
     monthDisplay.addEventListener('blur', function () {
       if (this.value.trim()) {
-        triggerCheck();
         updateQuarterlyFields();
+        triggerCheck();
+        updatePendingStatus();
       }
     });
 
-    // ---------- Form submit, clear, edit ----------
+    // ---------- Form buttons ----------
     document.getElementById('editBtn').addEventListener('click', async function () {
       const branch = getVal('branch');
       const month = getVal('reportMonth');
-      if (!branch) { await showAppAlert('Please select a branch first.', { title: '⚠️ Branch Required' }); return; }
-      if (!branches.includes(branch)) { await showAppAlert('Please select a valid branch from the suggestions list.', { title: '⚠️ Invalid Branch' }); return; }
-      if (!month) { await showAppAlert('Please select a reporting month first.', { title: '⚠️ Month Required' }); return; }
+
+      if (!branch) {
+        await showAppAlert('Please select a branch first.', { title: '⚠️ Branch Required' });
+        return;
+      }
+
+      if (!branches.includes(branch)) {
+        await showAppAlert('Please select a valid branch from the suggestions list.', { title: '⚠️ Invalid Branch' });
+        return;
+      }
+
+      if (!month) {
+        await showAppAlert('Please select a reporting month first.', { title: '⚠️ Month Required' });
+        return;
+      }
+
       const existing = findExistingRecord(branch, month);
+
       if (existing) {
         showConfirmPopup(existing, 'formCheck');
         return;
       }
+
       await loadIntoForm(branch, month, { button: this });
     });
 
     document.getElementById('clearBtn').addEventListener('click', async function () {
-      const confirmed = await showAppConfirm('Are you sure you want to clear all entered values?', { title: '🧹 Clear Form', okText: 'Yes, Clear', cancelText: 'Cancel' });
+      const confirmed = await showAppConfirm(
+        'Are you sure you want to clear all entered values?',
+        { title: '🧹 Clear Form', okText: 'Yes, Clear', cancelText: 'Cancel' }
+      );
+
       if (!confirmed) return;
+
       resetFormToZero();
       document.getElementById('successMsg').classList.remove('show');
       document.getElementById('errorMsg').classList.remove('show');
@@ -1780,36 +2463,100 @@
 
     document.getElementById('itForm').addEventListener('submit', async function (e) {
       e.preventDefault();
+
       const submitBtn = document.getElementById('submitBtn');
       const payload = createPayload();
-      if (!payload.branch) { await showAppAlert('Please select a branch.', { title: '⚠️ Branch Required' }); return; }
-      if (!branches.includes(payload.branch)) { await showAppAlert('Please select a valid branch from the suggestions list.', { title: '⚠️ Invalid Branch' }); return; }
-      if (!payload.report_month) { await showAppAlert('Please select a reporting month.', { title: '⚠️ Month Required' }); return; }
+
+      if (!payload.branch) {
+        await showAppAlert('Please select a branch.', { title: '⚠️ Branch Required' });
+        return;
+      }
+
+      if (!branches.includes(payload.branch)) {
+        await showAppAlert('Please select a valid branch from the suggestions list.', { title: '⚠️ Invalid Branch' });
+        return;
+      }
+
+      if (!payload.report_month) {
+        await showAppAlert('Please select a reporting month.', { title: '⚠️ Month Required' });
+        return;
+      }
+
+      // Final safety check. Relative values can never exceed their source values.
+      const invalidPairs = [
+        ['tshirtPaid', 'tshirtDue', 'T-shirt/Uniform Paid', 'T-shirt/Uniform Due'],
+        ['salaryPaid', 'salaryDue', 'Instructor Salary Paid', 'Instructor Salary Due'],
+        ['hotelPaid', 'hotelDue', 'Hotel/Accommodation Paid', 'Hotel/Accommodation Due'],
+        ['merchPaid', 'merchDue', 'Merchandise Paid', 'Merchandise Due'],
+        ['complaintsResolved', 'complaintsReceived', 'Complaints Resolved', 'Complaints Received']
+      ];
+
+      for (const [fieldId, boundId, fieldLabel, boundLabel] of invalidPairs) {
+        const fieldValue = getNum(fieldId);
+        const boundValue = getNum(boundId);
+
+        if (fieldValue > boundValue) {
+          document.getElementById(fieldId).value = boundValue;
+          flashWarning(fieldId, `${fieldLabel} cannot exceed ${boundLabel}. Value set to ${boundValue}.`);
+        }
+      }
+
+      clampDropouts();
+
       submitBtn.disabled = true;
       submitBtn.textContent = '⏳ Submitting...';
+
       try {
         const response = await fetch('/api/it/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(createPayload())
         });
+
         if (response.ok) {
           let result = {};
-          try { result = await response.json(); } catch (parseErr) { }
-          const mode = result.mode || (document.body.classList.contains('editing') ? 'updated' : 'created');
-          showSuccess(mode === 'updated' ? 'Existing data updated successfully!' : 'Form created successfully!');
-          document.getElementById('filterMonth').value = payload.report_month;
+          try {
+            result = await response.json();
+          } catch (parseErr) { }
+
+          const mode = result.mode ||
+            (document.body.classList.contains('editing') ? 'updated' : 'created');
+
+          const savedMonth = payload.report_month;
+
+          showSuccess(
+            mode === 'updated'
+              ? 'Existing data updated successfully!'
+              : 'Form created successfully!'
+          );
+
+          document.getElementById('filterMonth').value = savedMonth;
           syncMonthDisplayFromValue('filterMonth', 'filterMonthDisplay');
+
+          // Refresh records BEFORE clearing the form so the new/updated row is visible immediately.
+          await renderRecordsTable();
+
+          // Keep current month selected in the form, but clear entered values.
           resetFormToZero();
+          document.getElementById('reportMonth').value = savedMonth;
+          syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay');
+          updateQuarterlyFields();
+
           window.scrollTo({ top: 0, behavior: 'smooth' });
-          renderRecordsTable();
+
         } else {
           let errorText = 'Unable to submit the form.';
-          try { const error = await response.json(); errorText = error.detail || error.message || errorText; } catch (parseErr) { }
+          try {
+            const error = await response.json();
+            errorText = error.detail || error.message || errorText;
+          } catch (parseErr) { }
+
           showError(errorText);
         }
+
       } catch (error) {
         showError(error.message || 'Network error. Please try again.');
+
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = '📤 Submit Form';
@@ -1817,11 +2564,20 @@
     });
 
     // ---------- Formatting ----------
-    function fmtPct(v) { if (v === undefined || v === null) return '—'; return (Number(v) * 100).toFixed(1) + '%'; }
-    function fmtNum(v) { if (v === undefined || v === null) return '—'; return Number(v).toLocaleString('en-IN'); }
-    function fmtText(v) { return (v === undefined || v === null || v === '') ? '—' : v; }
+    function fmtPct(v) {
+      if (v === undefined || v === null) return '—';
+      return (Number(v) * 100).toFixed(1) + '%';
+    }
 
-    // Updated ALL_FIELDS: removed the green fields
+    function fmtNum(v) {
+      if (v === undefined || v === null) return '—';
+      return Number(v).toLocaleString('en-IN');
+    }
+
+    function fmtText(v) {
+      return (v === undefined || v === null || v === '') ? '—' : String(v);
+    }
+
     const ALL_FIELDS = [
       ['report_month', 'Reporting Month', 'text'],
       ['revenue_target', 'Revenue Target', 'currency'],
@@ -1841,12 +2597,9 @@
       ['new_enrollments', 'New Paid Admissions', 'num'],
       ['dropouts', 'Dropouts', 'num'],
       ['closing_students', 'Closing Students', 'num'],
-      // removed: batch_utilization, trials_conducted, trial_conversions
       ['attendance_recording', 'Attendance Recording Compliance', 'pct'],
       ['crm_usage', 'CRM/App Usage Compliance', 'pct'],
       ['report_submission', 'Report Submission Compliance', 'pct'],
-      // removed: classes_planned, classes_conducted, trainer_attendance
-      // removed: hygiene_score, curriculum_compliance, trainer_certification
       ['branding_compliance', 'Branding/Signage Compliance', 'pct'],
       ['mystery_audit_score', 'Audit/Mystery Visit Score', 'pct'],
       ['satisfaction_score', 'Parent/Student Satisfaction', 'pct'],
@@ -1857,158 +2610,265 @@
       ['event_satisfaction', 'Event/Workshop Satisfaction', 'pct'],
       ['marketing_activities', 'Marketing Activities Completed', 'num'],
       ['partnerships', 'Partnerships Activated', 'num'],
-      // removed: social_media_posts, events_workshops
       ['unauthorized_discount', 'Unauthorized Discount?', 'text'],
       ['false_reporting', 'False Reporting Detected?', 'text'],
       ['trainer_misconduct', 'Trainer Misconduct Issue?', 'text'],
       ['comments', 'Comments/Observations', 'text']
     ];
-    function fmtField(type, v) { if (type === 'currency') return '₹' + fmtNum(v); if (type === 'pct') return fmtPct(v); if (type === 'num') return fmtNum(v); return fmtText(v); }
 
-    // ---------- Render records table ----------
+    function fmtField(type, v) {
+      if (type === 'currency') return '₹' + fmtNum(v);
+      if (type === 'pct') return fmtPct(v);
+      if (type === 'num') return fmtNum(v);
+      return fmtText(v);
+    }
+
+    function recordJsonAttr(record) {
+      return escapeHtml(JSON.stringify(record));
+    }
+
+    function buildDesktopTable(rows) {
+      let html =
+        '<div class="desktop-only"><div class="table-wrap"><table class="records-table">' +
+        '<thead><tr><th></th><th>#</th><th>Branch</th>' +
+        ALL_FIELDS.map(([key, label]) => `<th>${escapeHtml(label)}</th>`).join('') +
+        '</tr></thead><tbody>';
+
+      rows.forEach((r, idx) => {
+        html +=
+          `<tr>` +
+          `<td><button type="button" class="row-edit-btn" data-branch="${escapeHtml(r.branch)}" data-month="${escapeHtml(r.report_month)}" data-record="${recordJsonAttr(r)}">✏️ Edit</button></td>` +
+          `<td class="row-num">${idx + 1}</td>` +
+          `<td><strong>${escapeHtml(r.branch || '—')}</strong></td>` +
+          ALL_FIELDS.map(([key, label, type]) =>
+            `<td>${fmtField(type, r[key])}</td>`
+          ).join('') +
+          `</tr>`;
+      });
+
+      html += '</tbody></table></div></div>';
+      return html;
+    }
+
+    function buildMobileCards(rows) {
+      let html = '<div class="mobile-only"><div class="card-list-wrap">';
+
+      rows.forEach((r, idx) => {
+        html +=
+          `<div class="record-card">` +
+          `<div class="record-card-head">` +
+          `<button type="button" class="row-edit-btn" data-branch="${escapeHtml(r.branch)}" data-month="${escapeHtml(r.report_month)}" data-record="${recordJsonAttr(r)}">✏️ Edit</button>` +
+          `<strong>${idx + 1}. ${escapeHtml(r.branch || '—')}</strong>` +
+          `</div>` +
+          `<div class="card-fields">` +
+          ALL_FIELDS.map(([key, label, type]) =>
+            `<div class="card-field"><span class="card-k">${escapeHtml(label)}</span><span class="card-v">${fmtField(type, r[key])}</span></div>`
+          ).join('') +
+          `</div></div>`;
+      });
+
+      html += '</div></div>';
+      return html;
+    }
+
+    function attachRecordEditButtons() {
+      document.querySelectorAll('.row-edit-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          const branch = this.dataset.branch;
+          const month = this.dataset.month;
+
+          let record = null;
+          try {
+            record = JSON.parse(this.dataset.record);
+          } catch (e) { }
+
+          if (record) {
+            showConfirmPopup(record, 'tableEdit');
+          } else {
+            const cached = findExistingRecord(branch, month);
+            if (cached) showConfirmPopup(cached, 'tableEdit');
+            else loadIntoForm(branch, month, { button: this });
+          }
+        });
+      });
+    }
+
+    // ---------- Render records ----------
     async function renderRecordsTable() {
       const wrap = document.getElementById('recordsWrap');
       const badge = document.getElementById('recordsBadge');
-      const branch = getVal('filterBranch');
+
+      const branch = getVal('filterBranch').trim();
       const month = getVal('filterMonth');
-      if (!month) { badge.textContent = 'Select a month'; wrap.innerHTML = '<div class="records-empty">Select a month in the filter bar above to view submitted data.</div>'; return; }
-      wrap.innerHTML = '<div class="records-empty">Loading...</div>';
-      if (!branch) {
-        badge.textContent = `All branches — ${month}`;
-        try {
-          const res = await fetch(`/api/it/all?month=${encodeURIComponent(month)}`);
-          if (!res.ok) throw new Error('No data endpoint or no records for this month.');
-          const rows = await res.json();
-          allRecords = rows;
-          if (!rows || !rows.length) {
-            wrap.innerHTML = '<div class="records-empty">No submissions found for this month yet.</div>';
-            return;
-          }
-          let html = '<div class="desktop-only"><div class="table-wrap"><table class="records-table"><thead><tr><th></th><th>#</th><th>Branch</th>' + ALL_FIELDS.map(([key, label]) => `<th>${label}</th>`).join('') + '</tr></thead><tbody>';
-          rows.forEach((r, idx) => {
-            html += `<tr><td><button type="button" class="row-edit-btn" data-branch="${r.branch}" data-month="${month}" data-record='${JSON.stringify(r).replace(/'/g, "&#39;")}'>✏️ Edit</button></td><td class="row-num">${idx + 1}</td><td><strong>${r.branch || '—'}</strong></td>` + ALL_FIELDS.map(([key, label, type]) => `<td>${fmtField(type, r[key])}</td>`).join('') + `</tr>`;
-          });
-          html += '</tbody></table></div></div><div class="mobile-only"><div class="card-list-wrap">';
-          rows.forEach((r, idx) => {
-            html += `<div class="record-card"><div class="record-card-head"><button type="button" class="row-edit-btn" data-branch="${r.branch}" data-month="${month}" data-record='${JSON.stringify(r).replace(/'/g, "&#39;")}'>✏️ Edit</button><strong>${idx + 1}. ${r.branch || '—'}</strong></div><div class="card-fields">` + ALL_FIELDS.map(([key, label, type]) => `<div class="card-field"><span class="card-k">${label}</span><span class="card-v">${fmtField(type, r[key])}</span></div>`).join('') + `</div></div>`;
-          });
-          html += '</div></div>';
-          wrap.innerHTML = html;
-          wrap.querySelectorAll('.row-edit-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-              const branch = this.dataset.branch;
-              const month = this.dataset.month;
-              let record = null;
-              try { record = JSON.parse(this.dataset.record); } catch (e) { }
-              if (record) {
-                showConfirmPopup(record, 'tableEdit');
-              } else {
-                const cached = findExistingRecord(branch, month);
-                if (cached) {
-                  showConfirmPopup(cached, 'tableEdit');
-                } else {
-                  loadIntoForm(branch, month, { button: this });
-                }
-              }
-            });
-          });
-        } catch (err) {
-          console.error('renderRecordsTable (all branches) error:', err);
-          wrap.innerHTML = `<div class="records-empty">Could not load branch list for this month.<br><small>${err.message}</small></div>`;
+
+      if (!month) {
+        badge.textContent = 'Select a month';
+        wrap.innerHTML =
+          '<div class="records-empty">Select a month in the filter bar above to view submitted data.</div>';
+        return;
+      }
+
+      const requestId = ++recordsRequestId;
+      wrap.innerHTML = '<div class="records-empty">⏳ Loading submitted records...</div>';
+
+      try {
+        // Always fetch the month from the server.
+        // This fixes stale/empty allRecords cache issues after submit.
+        const rows = await fetchAllRecords(month);
+
+        if (requestId !== recordsRequestId) return;
+
+        allRecords = rows;
+
+        const filteredRows = branch
+          ? rows.filter(r =>
+            String(r.branch || '').trim().toLowerCase() === branch.toLowerCase()
+          )
+          : rows;
+
+        badge.textContent = branch
+          ? `${branch} — ${monthLabel(month)}`
+          : `${filteredRows.length} record${filteredRows.length === 1 ? '' : 's'} — ${monthLabel(month)}`;
+
+        if (!filteredRows.length) {
+          wrap.innerHTML =
+            `<div class="records-empty">No submissions found for ${escapeHtml(monthLabel(month))}` +
+            `${branch ? ` for ${escapeHtml(branch)}` : ''}.</div>`;
+          return;
         }
-      } else {
-        badge.textContent = `${branch} — ${month}`;
-        try {
-          const res = await fetch(`/api/it/get?branch=${encodeURIComponent(branch)}&report_month=${encodeURIComponent(month)}`);
-          if (!res.ok) {
-            wrap.innerHTML = `<div class="records-empty">No saved data yet for ${branch} — ${month}.</div>`;
-            return;
-          }
-          const d = await res.json();
-          const existingIdx = allRecords.findIndex(r => r.branch === d.branch && r.report_month === d.report_month);
-          if (existingIdx > -1) allRecords[existingIdx] = d;
-          else allRecords.push(d);
-          let html = `<div style="margin-bottom:14px;"><button type="button" class="row-edit-btn" id="detailEditBtn" data-record='${JSON.stringify(d).replace(/'/g, "&#39;")}'>✏️ Edit This Record</button></div><div class="table-wrap"><table class="records-table detail-table"><tbody><tr><td class="k">Branch</td><td class="v">${fmtText(d.branch)}</td></tr>`;
-          ALL_FIELDS.forEach(([key, label, type]) => {
-            html += `<tr><td class="k">${label}</td><td class="v">${fmtField(type, d[key])}</td></tr>`;
-          });
-          html += '</tbody></table></div>';
-          wrap.innerHTML = html;
-          document.getElementById('detailEditBtn').addEventListener('click', function () {
-            let record = null;
-            try { record = JSON.parse(this.dataset.record); } catch (e) { }
-            if (record) {
-              showConfirmPopup(record, 'tableEdit');
-            } else {
-              loadIntoForm(branch, month, { button: this });
+
+        wrap.innerHTML =
+          buildDesktopTable(filteredRows) +
+          buildMobileCards(filteredRows);
+
+        attachRecordEditButtons();
+
+      } catch (err) {
+        console.error('renderRecordsTable error:', err);
+
+        // If the branch filter is set, use the single-record endpoint as a final fallback.
+        if (branch) {
+          try {
+            const response = await fetch(
+              `/api/it/get?branch=${encodeURIComponent(branch)}&report_month=${encodeURIComponent(month)}`,
+              { cache: 'no-store' }
+            );
+
+            if (response.ok) {
+              const record = normaliseRecord(await response.json());
+              allRecords = allRecords.filter(r =>
+                !(r.branch === record.branch && r.report_month === record.report_month)
+              );
+              allRecords.push(record);
+
+              badge.textContent = `${branch} — ${monthLabel(month)}`;
+              wrap.innerHTML =
+                buildDesktopTable([record]) +
+                buildMobileCards([record]);
+              attachRecordEditButtons();
+              return;
             }
-          });
-        } catch (err) {
-          console.error('renderRecordsTable (single branch) error:', err);
-          wrap.innerHTML = `<div class="records-empty">Could not load this record.<br><small>${err.message}</small></div>`;
+          } catch (fallbackErr) {
+            console.error('single record fallback failed:', fallbackErr);
+          }
         }
+
+        badge.textContent = `${monthLabel(month)}`;
+        wrap.innerHTML =
+          `<div class="records-empty">Could not load submitted records.` +
+          `<br><small>${escapeHtml(err.message || 'Unknown error')}</small></div>`;
       }
     }
 
+    // ---------- Filter reset ----------
     document.getElementById('filterReset').addEventListener('click', function () {
       document.getElementById('filterMonth').value = '2026-08';
       syncMonthDisplayFromValue('filterMonth', 'filterMonthDisplay');
       document.getElementById('filterBranch').value = '';
       renderRecordsTable();
     });
-    renderRecordsTable();
 
-    // ---------- Missing button ----------
-    document.getElementById('missingBtn').addEventListener('click', function () {
-      const initialMonth = document.getElementById('filterMonth').value || document.getElementById('reportMonth').value || '2026-08';
+    // ---------- Pending Items popup ----------
+    document.getElementById('missingBtn').addEventListener('click', async function () {
+      const initialMonth =
+        document.getElementById('filterMonth').value ||
+        document.getElementById('reportMonth').value ||
+        '2026-08';
+
       const overlay = document.createElement('div');
       overlay.className = 'missing-popup-overlay';
+
       overlay.innerHTML = `
-      <div class="missing-popup">
-        <h2>📋 Missing Branches</h2>
-        <div class="form-group">
-          <label>Month</label>
-          <select id="missingMonthSelect"></select>
-        </div>
-        <p id="missingSummary" style="margin-bottom:12px;color:var(--grey-500);">Loading...</p>
-        <div id="missingListWrap"><p class="missing-empty">Loading...</p></div>
-        <button type="button" class="close-btn">Close</button>
-      </div>`;
+        <div class="missing-popup">
+          <h2>📋 Pending Items</h2>
+
+          <div class="form-group">
+            <label>Month</label>
+            <select id="missingMonthSelect"></select>
+          </div>
+
+          <p id="missingSummary" style="margin-bottom:12px;color:var(--grey-500);">Loading...</p>
+          <div id="missingListWrap">
+            <p class="missing-empty">Loading...</p>
+          </div>
+
+          <button type="button" class="close-btn">Close</button>
+        </div>`;
+
       document.body.appendChild(overlay);
+
       overlay.querySelector('.close-btn').addEventListener('click', () => overlay.remove());
-      overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+      });
+
       const monthSelect = overlay.querySelector('#missingMonthSelect');
+
       MONTHS.forEach(m => {
         const opt = document.createElement('option');
         opt.value = m.value;
         opt.textContent = m.label;
         monthSelect.appendChild(opt);
       });
+
       monthSelect.value = initialMonth;
-      async function loadMissingFor(month) {
+
+      async function loadPendingFor(month) {
         const summaryEl = overlay.querySelector('#missingSummary');
         const listWrap = overlay.querySelector('#missingListWrap');
+
         summaryEl.textContent = 'Loading...';
         listWrap.innerHTML = '<p class="missing-empty">Loading...</p>';
+
         try {
-          const res = await fetch(`/api/it/all?month=${encodeURIComponent(month)}`);
-          let submitted = [];
-          if (res.ok) {
-            const data = await res.json();
-            submitted = data.map(item => item.branch);
-          }
-          const missing = branches.filter(b => !submitted.includes(b));
-          summaryEl.textContent = `${missing.length} out of ${branches.length} branches have not submitted data for ${monthLabel(month)}.`;
-          listWrap.innerHTML = missing.length === 0
+          const rows = await fetchAllRecords(month);
+          const submittedBranches = new Set(
+            rows.map(item => String(item.branch || '').trim().toLowerCase())
+          );
+
+          const missingBranches = branches.filter(
+            b => !submittedBranches.has(b.toLowerCase())
+          );
+
+          summaryEl.textContent =
+            `${missingBranches.length} out of ${branches.length} branches have not submitted data for ${monthLabel(month)}.`;
+
+          listWrap.innerHTML = missingBranches.length === 0
             ? '<p class="missing-empty">✅ All branches have submitted data for this month.</p>'
-            : `<ul>${missing.map((b, idx) => `<li><span class="missing-num">${idx + 1}.</span><span>📍</span> ${b}</li>`).join('')}</ul>`;
+            : `<ul>${missingBranches.map((b, idx) =>
+              `<li><span class="missing-num">${idx + 1}.</span><span>📍</span><span>${escapeHtml(b)}</span></li>`
+            ).join('')}</ul>`;
+
         } catch (e) {
+          console.error('pending branches error:', e);
           summaryEl.textContent = '';
-          listWrap.innerHTML = '<p class="missing-empty">Could not fetch missing branches. Check backend /api/it/all</p>';
+          listWrap.innerHTML =
+            '<p class="missing-empty">Could not fetch submitted branches. Check /api/it/all.</p>';
         }
       }
-      monthSelect.addEventListener('change', () => loadMissingFor(monthSelect.value));
-      loadMissingFor(initialMonth);
+
+      monthSelect.addEventListener('change', () => loadPendingFor(monthSelect.value));
+      loadPendingFor(initialMonth);
     });
 
     // ---------- Keyboard navigation ----------
@@ -2016,37 +2876,56 @@
       document.querySelectorAll(containerSelector).forEach(section => {
         const inputs = section.querySelectorAll('input, select');
         if (inputs.length === 0) return;
+
         const grid = [];
         let currentRow = [];
         let prevTop = -1;
+
         inputs.forEach(inp => {
           const rect = inp.getBoundingClientRect();
           const top = Math.round(rect.top);
+
           if (top !== prevTop && currentRow.length > 0) {
             grid.push(currentRow);
             currentRow = [];
           }
+
           currentRow.push(inp);
           prevTop = top;
         });
+
         if (currentRow.length > 0) grid.push(currentRow);
+
         const flat = inputs;
+
         flat.forEach((inp) => {
-          let rowIdx = 0, colIdx = 0;
+          let rowIdx = 0;
+          let colIdx = 0;
+
           for (let r = 0; r < grid.length; r++) {
             const c = grid[r].indexOf(inp);
-            if (c !== -1) { rowIdx = r; colIdx = c; break; }
+            if (c !== -1) {
+              rowIdx = r;
+              colIdx = c;
+              break;
+            }
           }
+
           inp.addEventListener('keydown', function (e) {
             const key = e.key;
             if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) return;
+
             e.preventDefault();
+
             const currentRowArr = grid[rowIdx] || [];
             const colCount = currentRowArr.length;
             let target = null;
-            if (key === 'ArrowLeft' && colIdx > 0) target = currentRowArr[colIdx - 1];
-            else if (key === 'ArrowRight' && colIdx < colCount - 1) target = currentRowArr[colIdx + 1];
-            else if (key === 'ArrowUp' && rowIdx > 0) {
+
+            if (key === 'ArrowLeft' && colIdx > 0) {
+              target = currentRowArr[colIdx - 1];
+            } else if (key === 'ArrowRight' && colIdx < colCount - 1) {
+              target = currentRowArr[colIdx + 1];
+            } else if (key === 'ArrowUp' && rowIdx > 0) {
               const above = grid[rowIdx - 1] || [];
               const targetCol = Math.min(colIdx, above.length - 1);
               target = above[targetCol] || above[above.length - 1] || null;
@@ -2055,15 +2934,22 @@
               const targetCol = Math.min(colIdx, below.length - 1);
               target = below[targetCol] || below[below.length - 1] || null;
             }
+
             if (target) target.focus();
           });
         });
       });
     }
+
+    // ---------- Initialise ----------
+    attachValidationListeners();
+    updateQuarterlyFields();
+    updatePendingStatus();
+
     setTimeout(() => setupKeyboardNav('.section'), 100);
 
-    // Initialise quarterly field state on page load
-    updateQuarterlyFields();
+    // Important: fetch submitted records immediately on page load.
+    renderRecordsTable();
   </script>
 </body>
 

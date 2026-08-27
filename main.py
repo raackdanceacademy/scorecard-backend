@@ -1051,25 +1051,74 @@ def get_it_submission_flat(
 
 @app.get("/api/it/all")
 def get_all_it_submissions_for_month(
-    month: str,
+    month: Optional[str] = None,
+    report_month: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
-    report_month = parse_month(month)
+    """
+    Return all IT submissions for the requested month.
+
+    Supports both:
+        /api/it/all?month=2026-08
+        /api/it/all?report_month=2026-08
+
+    This matches the frontend fetch calls and also applies the
+    quarter-start values for quarterly fields when required.
+    """
+
+    selected_month = (month or report_month or "").strip()
+
+    if not selected_month:
+        raise HTTPException(
+            status_code=400,
+            detail="Month is required. Use YYYY-MM."
+        )
+
+    parsed_month = parse_month(selected_month)
 
     subs = (
         db.query(ITSubmission)
         .join(Branch, ITSubmission.branch_id == Branch.id)
         .filter(
-            ITSubmission.report_month == report_month
+            ITSubmission.report_month == parsed_month
         )
         .order_by(Branch.name)
         .all()
     )
 
-    return [
-        submission_to_dict(it_sub)
-        for it_sub in subs
-    ]
+    results = []
+
+    for it_sub in subs:
+        data = submission_to_dict(it_sub)
+
+        # For non-quarter months, use the quarter-start submission
+        # for the quarterly fields.
+        quarter_start = get_quarter_start_month(parsed_month)
+
+        if parsed_month != quarter_start:
+            quarter_sub = (
+                db.query(ITSubmission)
+                .filter(
+                    ITSubmission.branch_id == it_sub.branch_id,
+                    ITSubmission.report_month == quarter_start,
+                )
+                .first()
+            )
+
+            if quarter_sub:
+                data["branding_compliance"] = (
+                    quarter_sub.branding_compliance or 0
+                )
+                data["mystery_audit_score"] = (
+                    quarter_sub.mystery_audit_score or 0
+                )
+                data["satisfaction_score"] = (
+                    quarter_sub.satisfaction_score or 0
+                )
+
+        results.append(data)
+
+    return results
 
 
 # ============================================================
