@@ -27,7 +27,7 @@ def get_quarter_start_month(month_date: date) -> date:
 
 
 def compute_financial_health(data):
-    """Max 225 — unchanged"""
+    """Max 225 — already summed to 1.0 in Sheet2 (0.35+0.25+0.15+0.15+0.10). Unchanged."""
     revenue_ratio = safe_div(data['actual_revenue'], data['target_revenue'], 0)
 
     total_due = data['tshirt_due'] + data['salary_due'] + data['hotel_due'] + data['merch_due']
@@ -47,7 +47,13 @@ def compute_financial_health(data):
 
 
 def compute_student_growth(data):
-    """Max 225 — new weights: 0.43, 0.49, 0.08"""
+    """
+    Max 225 — Sheet2's raw weights are 0.27/0.31/0.22 (sum 0.80), which caps
+    this category at 180/225 even with perfect inputs. Normalized here by
+    dividing each weight by 0.80 (i.e. multiplying by 27/80, 31/80, 22/80)
+    so the same relative emphasis (retention weighted highest, dropout
+    control lowest) now sums to 1.0 and the category can reach its full 225.
+    """
     opening = data['opening_students']
     new_students = data['new_students']
     dropouts = data['dropouts']
@@ -59,36 +65,48 @@ def compute_student_growth(data):
     )
     dropout_rate = safe_div(dropouts, max(1, opening + new_students), 0)
 
+    admission_component = min(safe_div(data['new_students'], max(1, data['new_student_target']), 0), 1.2) / 1.2
+
     student_growth = 225 * (
-        0.43 * min(safe_div(data['new_students'], max(1, data['new_student_target']), 0), 1.2) / 1.2 +
-        0.49 * retention_rate +
-        0.08 * max(0, 1 - dropout_rate / 0.15)
+        (27 / 80) * admission_component +
+        (31 / 80) * retention_rate +
+        (22 / 80) * max(0, 1 - dropout_rate / 0.15)
     )
 
     return round(student_growth)
 
 
 def compute_operations_discipline(data):
-    """Max 135 — new weights: 0.44, 0.33, 0.22"""
+    """
+    Max 135 — Sheet2's raw weights are 0.20/0.15/0.10 (sum 0.45), capping
+    this category at ~61/135. Normalized by dividing by 0.45
+    (equivalently 4/9, 3/9, 2/9) so the same relative emphasis (attendance
+    weighted highest) sums to 1.0.
+    """
     operations_discipline = 135 * (
-        0.44 * data['attendance_recording'] +
-        0.33 * data['crm_usage'] +
-        0.22 * data['report_submission']
+        (4 / 9) * data['attendance_recording'] +
+        (3 / 9) * data['crm_usage'] +
+        (2 / 9) * data['report_submission']
     )
     return round(operations_discipline)
 
 
 def compute_brand_quality(data):
-    """Max 70 — new weights: 0.33, 0.67"""
+    """
+    Max 70 — Sheet2's raw weights are 0.10/0.20 (sum 0.30), capping this
+    category at 21/70. Normalized by dividing by 0.30 (equivalently 1/3,
+    2/3) so mystery-audit still counts twice as much as branding compliance,
+    but the pair now sums to 1.0.
+    """
     brand_quality = 70 * (
-        0.33 * data['branding_compliance'] +
-        0.67 * data['mystery_audit_score']
+        (1 / 3) * data['branding_compliance'] +
+        (2 / 3) * data['mystery_audit_score']
     )
     return round(brand_quality)
 
 
 def compute_customer_experience(data):
-    """Max 70 — unchanged"""
+    """Max 70 — already summed to 1.0 in Sheet2 (0.35+0.20+0.20+0.15+0.10). Unchanged."""
     complaint_resolution_rate = min(safe_div(data['complaints_resolved'], data['complaints_received'], 1), 1)
 
     customer_experience = 70 * (
@@ -103,16 +121,38 @@ def compute_customer_experience(data):
 
 
 def compute_local_marketing(data):
-    """Max 175 — new weights: 0.67, 0.33"""
+    """
+    Max 175 — Sheet2's full formula has 3 terms (0.4 activities / 0.2
+    partnerships / 0.2 social_posts, sum 0.8), but the IT form only
+    collects activities and partnerships (no social_posts field). Using
+    just those two raw Sheet2 weights (0.4, 0.2) sums to only 0.6, capping
+    this category at 105/175. Normalized by dividing by 0.6 (equivalently
+    2/3, 1/3) so activities still counts twice as much as partnerships,
+    but the pair now sums to 1.0.
+    """
     local_marketing = 175 * (
-        0.67 * min(data['marketing_activities'] / 8, 1) +
-        0.33 * min(data['partnerships'] / 4, 1)
+        (2 / 3) * min(data['marketing_activities'] / 8, 1) +
+        (1 / 3) * min(data['partnerships'] / 4, 1)
     )
     return round(local_marketing)
 
 
 def compute_penalties(data):
-    """Penalty — removed hygiene & curriculum checks"""
+    """
+    Penalty rules. Sheet2 col BA's actual formula only implements 3 rules:
+        - payment completion < 75%           -> 20
+        - outstanding dues > 25% of due       -> 15
+        - complaints > 0 and resolution < 70% -> 15
+    It does NOT reference unauthorized discount, false reporting, or
+    trainer misconduct at all, even though the Penalty_Rules documentation
+    tab lists those as active rules (20 / 50 / 40 pts respectively).
+
+    Since the IT form still collects those three flags, this function keeps
+    the existing flag-based penalties in ADDITION to Sheet2's 3 rules,
+    rather than silently dropping ~110 points of governance penalties.
+    If you want strict Sheet2-only behavior, delete the three `if` blocks
+    marked below.
+    """
     penalty = 0
 
     total_due = data['tshirt_due'] + data['salary_due'] + data['hotel_due'] + data['merch_due']
@@ -121,14 +161,17 @@ def compute_penalties(data):
     payment_shortfall = max(0, total_due - total_paid)
     complaint_resolution_rate = min(safe_div(data['complaints_resolved'], data['complaints_received'], 1), 1)
 
+    # --- Sheet2 col BA rules (verified) ---
     if payment_ratio < 0.75:
         penalty += 20
     if total_due > 0 and safe_div(payment_shortfall, total_due, 0) > 0.25:
         penalty += 15
-    if data.get('unauthorized_discount', 'No') == 'Yes':
-        penalty += 20
     if data.get('complaints_received', 0) > 0 and complaint_resolution_rate < 0.7:
         penalty += 15
+
+    # --- Kept from prior code; NOT present in Sheet2's BA formula ---
+    if data.get('unauthorized_discount', 'No') == 'Yes':
+        penalty += 20
     if data.get('false_reporting', 'No') == 'Yes':
         penalty += 50
     if data.get('trainer_misconduct', 'No') == 'Yes':
@@ -138,6 +181,7 @@ def compute_penalties(data):
 
 
 def compute_rating(final_score):
+    """Verified against Sheet2 col BC (IFS formula). Unchanged."""
     if final_score >= 800:
         return "Excellent"
     if final_score >= 700:
@@ -150,6 +194,7 @@ def compute_rating(final_score):
 
 
 def compute_action(final_score):
+    """Verified against Sheet2 col BD. Unchanged."""
     if final_score < 500:
         return "Critical intervention"
     if final_score < 600:

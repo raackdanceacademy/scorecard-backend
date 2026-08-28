@@ -17,6 +17,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
   </script>
   <style>
+    /* (styles unchanged) */
     :root {
       --void: #f4f6f8;
       --base: #ffffff;
@@ -257,6 +258,34 @@
       color: #34d399;
     }
 
+    .icon-btn.focus-toggle {
+      background: rgba(220, 38, 38, 0.08);
+      border-color: #dc2626;
+      color: #b91c1c;
+    }
+
+    .icon-btn.focus-toggle:hover {
+      background: rgba(220, 38, 38, 0.15);
+    }
+
+    .icon-btn.focus-toggle.active {
+      background: #dc2626;
+      border-color: #dc2626;
+      color: #fff;
+    }
+
+    [data-theme="dark"] .icon-btn.focus-toggle {
+      background: rgba(248, 113, 113, 0.10);
+      border-color: #f87171;
+      color: #f87171;
+    }
+
+    [data-theme="dark"] .icon-btn.focus-toggle.active {
+      background: #f87171;
+      border-color: #f87171;
+      color: #171b23;
+    }
+
     .theme-toggle {
       padding: 8px 13px;
       background: var(--surface);
@@ -452,20 +481,20 @@
     .sd-bar-track {
       height: 20px;
       background: var(--surface-3);
-      border-radius: 10px;
+      border-radius: 0;
       overflow: hidden;
       position: relative;
     }
 
     .sd-bar-fill {
       height: 100%;
-      border-radius: 10px;
+      border-radius: 0;
       transition: width 0.6s ease;
     }
 
     .sd-bar-target {
       height: 100%;
-      border-radius: 10px;
+      border-radius: 0;
       background: var(--line);
       position: absolute;
       top: 0;
@@ -508,13 +537,19 @@
       color: var(--accent);
     }
 
+    /* ----- Collapsible Focus Areas box (moved to top of Score Distribution card) ----- */
+    .focus-area-box {
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
     .focus-chips {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--line-soft);
     }
 
     .focus-chip {
@@ -584,7 +619,7 @@
 
     .rating-legend-inline {
       display: flex;
-      gap: 10px;
+      gap: 6px;
       flex-wrap: wrap;
       align-items: center;
       font-size: 10.5px;
@@ -594,10 +629,40 @@
 
     .rating-legend-inline .rl-dot {
       display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 3px;
-      margin-right: 2px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+      flex-shrink: 0;
+    }
+
+    .rating-legend-chip {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid;
+      line-height: 1.2;
+    }
+
+    .rating-legend-chip .rlc-range {
+      opacity: 0.75;
+      font-weight: 600;
+      margin-right: 5px;
+    }
+
+    @media (max-width:600px) {
+      .rating-legend-chip {
+        font-size: 10px;
+        padding: 3px 8px;
+      }
+
+      .rating-legend-chip .rlc-range {
+        display: none;
+      }
     }
 
     .score-summary-bottom {
@@ -1389,6 +1454,96 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* ----- Additional style for the red line chart ----- */
+    .chart-box.branch-line {
+      height: 380px;
+      max-height: 380px;
+    }
+
+    .chart-box.branch-line canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* ----- Score Highlight donut (franchise view) ----- */
+    .score-highlight-wrap {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+
+    .score-highlight-chart {
+      position: relative;
+      width: 170px;
+      height: 170px;
+      flex-shrink: 0;
+    }
+
+    .score-highlight-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .shc-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .shc-max {
+      font-size: 12px;
+      color: var(--grey-500);
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .score-highlight-info {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .score-highlight-info .rating-badge {
+      align-self: flex-start;
+      font-size: 15px;
+      padding: 7px 18px;
+    }
+
+    .shc-message {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .shc-sub {
+      font-size: 12.5px;
+      color: var(--grey-500);
+      font-weight: 600;
+    }
+
+    @media (max-width:600px) {
+      .score-highlight-wrap {
+        gap: 16px;
+      }
+
+      .score-highlight-chart {
+        width: 130px;
+        height: 130px;
+      }
+
+      .shc-value {
+        font-size: 26px;
+      }
+    }
   </style>
 </head>
 
@@ -1406,7 +1561,8 @@
         <button id="exportAllBtn" class="icon-btn export" style="display:none;"></button>
         <a href="/it-form" id="formBtn" class="icon-btn primary" style="display:none;"></a>
         <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"></button>
-        <a href="/login" class="icon-btn"></a>
+        <!-- Back / Logout button -->
+        <a href="/login" class="icon-btn" id="backBtn"></a>
       </div>
     </div>
 
@@ -1484,8 +1640,6 @@
       if (exportBtn) exportBtn.innerHTML = `${I('download')} Export All Branches`;
       const formBtn = document.getElementById('formBtn');
       if (formBtn) formBtn.innerHTML = `${I('form')} Score Card Submission Form`;
-      const backBtn = document.querySelector('a.icon-btn[href="/login"]');
-      if (backBtn) backBtn.innerHTML = `${I('arrowleft')} Back`;
     }
 
     function toggleTheme() {
@@ -1509,7 +1663,6 @@
     Chart.defaults.font.family = "'Inter', sans-serif";
     Chart.defaults.font.size = 12.5;
 
-    /* Flat, simple color for every bar/slice — no 3D or gradients */
     const CATEGORY_PIE_COLORS = ['#2563eb', '#0ea5e9', '#16a34a', '#d97706', '#db2777', '#7c3aed'];
 
     function tierColorForPercent(pct) {
@@ -1521,11 +1674,11 @@
     }
 
     const RATING_BANDS = [
-      { min: 720, max: 900, label: 'Excellent', color: '#16a34a', range: '720–900' },
-      { min: 630, max: 719, label: 'Good', color: '#0d9488', range: '630–719' },
-      { min: 495, max: 629, label: 'Watchlist', color: '#d97706', range: '495–629' },
-      { min: 360, max: 494, label: 'Risky', color: '#ea580c', range: '360–494' },
-      { min: 0, max: 359, label: 'Critical', color: '#dc2626', range: 'Below 360' }
+      { min: 800, max: 900, label: 'Excellent', color: '#16a34a', range: '800–900' },
+      { min: 700, max: 799, label: 'Good', color: '#0d9488', range: '700–799' },
+      { min: 600, max: 699, label: 'Watchlist', color: '#d97706', range: '600–699' },
+      { min: 500, max: 599, label: 'Risky', color: '#ea580c', range: '500–599' },
+      { min: 0, max: 499, label: 'Critical', color: '#dc2626', range: 'Below 500' }
     ];
 
     function getRatingBand(score) {
@@ -1620,11 +1773,7 @@
         const val = d[s.key];
         if (val === undefined || val === null) return;
         const rounded = roundValue(val);
-        if (rounded < threshold) low.push({
-          key: s.key,
-          val: rounded,
-          label: s.label
-        });
+        if (rounded < threshold) low.push({ key: s.key, val: rounded, label: s.label });
       });
       low.sort((a, b) => a.val - b.val);
       return low;
@@ -1641,12 +1790,30 @@
     }
 
     /* ===================== YEAR / MONTH LIST HELPERS ===================== */
+    // Calendar order (Jan–Dec) for the dropdown
     function monthListForYear(year) {
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
         'October', 'November', 'December'
       ];
       return monthNames.map((name, idx) => [`${year}-${String(idx + 1).padStart(2, '0')}`, `${name} ${year}`]);
     }
+
+    // Financial year order (June–May) for the chart
+    function financialYearMonths(year) {
+      const monthNames = ['June', 'July', 'August', 'September', 'October', 'November', 'December',
+        'January', 'February', 'March', 'April', 'May'
+      ];
+      const startMonth = 6; // June
+      const result = [];
+      for (let i = 0; i < 12; i++) {
+        const m = (startMonth + i - 1) % 12 + 1;
+        const y = (m >= 6) ? year : year + 1;
+        const monthStr = String(m).padStart(2, '0');
+        result.push([`${y}-${monthStr}`, `${monthNames[i]} ${y}`]);
+      }
+      return result;
+    }
+
     const _initUrlParams = new URLSearchParams(window.location.search);
     let currentYear = (_initUrlParams.get('year') || (_initUrlParams.get('month') || '2026-08').split('-')[0]);
     let MONTH_LIST = monthListForYear(currentYear);
@@ -1685,6 +1852,19 @@
       if (e.key === 'Escape' && dataViewModalOverlay.classList.contains(
         'open')) closeDataViewModal();
     });
+
+    /* ===================== FOCUS AREAS BOX TOGGLE ===================== */
+    function toggleFocusBox() {
+      const box = document.getElementById('focusAreaBox');
+      const btn = document.getElementById('focusAreaToggleBtn');
+      if (!box) return;
+      const willOpen = box.style.display === 'none' || !box.style.display;
+      box.style.display = willOpen ? 'block' : 'none';
+      if (btn) {
+        btn.classList.toggle('active', willOpen);
+        btn.innerHTML = `${I('flag')} Focus Areas ${I('chevron')}`;
+      }
+    }
 
     /* ===================== DATA VIEW HELPERS ===================== */
     function dvFmtPct(v) { if (v === undefined || v === null) return '—'; return (Number(v) * 100).toFixed(1) + '%'; }
@@ -1901,8 +2081,14 @@
             </div>`;
     }
 
+    /* ===================== NAVIGATE INTO A BRANCH ===================== */
     function navigateToBranch(branchName) {
       const params = new URLSearchParams({ role: 'franchise', branch: branchName, month: currentMonth });
+      if (userRole !== 'franchise') {
+        params.set('from', userRole);
+      } else if (fromRole) {
+        params.set('from', fromRole);
+      }
       window.location.href = '/dashboard?' + params.toString();
     }
 
@@ -1917,6 +2103,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const userRole = urlParams.get('role') || 'franchise';
     const userBranch = urlParams.get('branch') || null;
+    const fromRole = urlParams.get('from') || null;
     let currentMonth = urlParams.get('month') || '2026-08';
     currentYear = currentMonth.split('-')[0];
     MONTH_LIST = monthListForYear(currentYear);
@@ -2048,6 +2235,43 @@
       return 'critical';
     }
 
+    /* ===================== Score Highlight donut (franchise) ===================== */
+    function renderScoreHighlightChart(finalScore, band) {
+      const canvas = document.getElementById('scoreHighlightChart');
+      if (!canvas) return;
+
+      const remaining = Math.max(0, 900 - finalScore);
+      const trackColor = isDarkTheme() ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+
+      if (charts.scoreHighlight) {
+        charts.scoreHighlight.destroy();
+        charts.scoreHighlight = null;
+      }
+
+      charts.scoreHighlight = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: [finalScore, remaining],
+            backgroundColor: [band.color, trackColor],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '78%',
+          rotation: -90,
+          circumference: 360,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false },
+            datalabels: { display: false }
+          }
+        }
+      });
+    }
+
     /* ===================== FRANCHISE VIEW ===================== */
     async function renderFranchiseView(content) {
       const res = await fetch(
@@ -2075,7 +2299,6 @@
         ['local_marketing', 'Local Marketing', 175]
       ];
 
-      // Category Overview - no legend
       let catOverviewHTML = `<div class="cat-overview-row">`;
       CAT_ROWS.forEach(([key, label, max]) => {
         const val = roundValue(roundedD[key]);
@@ -2099,7 +2322,6 @@
         </div>
       </div>`;
 
-      // Score Distribution bars
       const catKeys = Object.keys(CATEGORY_MAX);
       let sdHTML = `<div class="score-distribution-horizontal">`;
       let totalActual = 0;
@@ -2125,7 +2347,7 @@
       const totalColor = tierColorForPercent(totalPct);
       sdHTML += `
         <div class="sd-total">
-          <div class="sd-label">Total</div>
+          <div class="sd-label">Base Score</div>
           <div class="sd-bar-track">
             <div class="sd-bar-fill" style="width:${Math.min(totalPct, 100)}%;background:${totalColor};"></div>
             <div class="sd-bar-target"></div>
@@ -2133,7 +2355,30 @@
           <div class="sd-value">${totalActual} <span class="max">/ ${totalMax}</span></div>
         </div>`;
 
-      // Focus areas
+      const penaltyVal = roundValue(roundedD.penalty);
+      if (penaltyVal > 0) {
+        sdHTML += `
+          <div class="sd-row">
+            <div class="sd-label" style="color:#dc2626;">Penalty</div>
+            <div class="sd-bar-track">
+              <div class="sd-bar-fill" style="width:${Math.min((penaltyVal / totalMax) * 100, 100)}%;background:#dc2626;"></div>
+              <div class="sd-bar-target"></div>
+            </div>
+            <div class="sd-value" style="color:#dc2626;">-${penaltyVal}</div>
+          </div>
+          <div class="sd-total">
+            <div class="sd-label">Final Score</div>
+            <div class="sd-bar-track">
+              <div class="sd-bar-fill" style="width:${Math.min((roundedD.final_score / totalMax) * 100, 100)}%;background:${tierColorForPercent(Math.round((roundedD.final_score / totalMax) * 1000) / 10)};"></div>
+              <div class="sd-bar-target"></div>
+            </div>
+            <div class="sd-value">${roundedD.final_score} <span class="max">/ ${totalMax}</span></div>
+          </div>`;
+      }
+      sdHTML += `</div>`;
+      sdHTML += `<div style="margin-top:6px;font-size:12px;color:var(--grey-500);">Target shown as 100% of max score</div>`;
+
+      // ----- Focus Areas content (now rendered inside the collapsible box at the top of the card) -----
       let focusChipsHTML = '';
       const focusItems = [];
       catKeys.forEach(k => {
@@ -2149,45 +2394,55 @@
       });
       focusItems.sort((a, b) => a.pct - b.pct);
       if (focusItems.length > 0) {
-        focusChipsHTML = `<div class="focus-chips"><span style="font-weight:600;color:var(--grey-500);font-size:12px;margin-right:4px;">Focus Areas:</span>`;
+        focusChipsHTML = `<div class="focus-chips">`;
         focusItems.forEach(item => {
-          focusChipsHTML += `<span class="focus-chip ${item.tier}">${item.label} (${item.pct}%) — ${item.tierLabel}</span>`;
+          focusChipsHTML +=
+            `<span class="focus-chip ${item.tier}">${item.label} (${item.pct}%) — ${item.tierLabel}</span>`;
         });
         focusChipsHTML += `</div>`;
       } else {
-        focusChipsHTML = `<div class="focus-chips"><span style="font-weight:600;color:var(--green);font-size:12px;">All categories are performing well! 🎉</span></div>`;
+        focusChipsHTML =
+          `<div class="focus-chips"><span style="font-weight:600;color:var(--green);font-size:12px;">All categories are performing well! 🎉</span></div>`;
       }
-      sdHTML += `</div>`;
-      sdHTML += `<div style="margin-top:6px;font-size:12px;color:var(--grey-500);">Target shown as 100% of max score</div>`;
-      sdHTML += focusChipsHTML;
 
-      // Rating legend
       const ratingLegendHTML = `
         <div class="rating-legend-inline">
-          <span style="font-weight:700;color:var(--grey-300);">Rating:</span>
-          ${RATING_BANDS.map(b => `<span><span class="rl-dot" style="background:${b.color};"></span>${b.range}</span>`).join('')}
+          <span style="font-weight:700;color:var(--grey-300);margin-right:2px;">Rating:</span>
+          ${RATING_BANDS.map(b => `
+            <span class="rating-legend-chip" style="background:${b.color}1a;color:${b.color};border-color:${b.color}55;">
+              <span class="rl-dot" style="background:${b.color};"></span><span class="rlc-range">${b.range}</span>${b.label}
+            </span>`).join('')}
         </div>
       `;
 
-      // Score summary - single line with score and message
       const remaining = Math.max(0, 900 - roundedD.final_score);
       const band = getRatingBand(roundedD.final_score);
-      const summaryHTML = `
-        <div class="score-summary-bottom grid-full">
-          <div class="card" style="text-align:left;">
-            <div class="summary-highlight" style="background:${band.color}18;">
-              <div class="sh-icon" style="background:${band.color}33;color:${band.color};">${I('target')}</div>
-              <div>
-                <div class="sh-title" style="color:${band.color};">
-                  ${roundedD.final_score} / 900 — ${remaining > 0 ? `You're ${remaining} points away from your target. Keep going!` : 'Target achieved! 🎉'}
-                </div>
+
+      const scoreHighlightHTML = `
+        <div class="card grid-full" id="scoreHighlightCard">
+          <h2>${I('target')} Final Score</h2>
+          <div class="score-highlight-wrap">
+            <div class="score-highlight-chart">
+              <canvas id="scoreHighlightChart"></canvas>
+              <div class="score-highlight-center">
+                <div class="shc-value" style="color:${band.color};">${roundedD.final_score}</div>
+                <div class="shc-max">/ 900</div>
               </div>
+            </div>
+            <div class="score-highlight-info">
+              <span class="rating-badge r-${roundedD.rating.replace(/\s/g, '')}">${roundedD.rating}</span>
+              <div class="shc-message" style="color:${band.color};">
+                ${remaining > 0 ? `${remaining} points away from your target. Keep going!` : 'Target achieved! 🎉'}
+              </div>
+              <div class="shc-sub">${userBranch} — ${formatMonth(currentMonth)}</div>
             </div>
           </div>
         </div>
       `;
 
       content.innerHTML = `
+        ${scoreHighlightHTML}
+
         <div class="card grid-full">
           <h2>
             ${I('dashboard')} Category Score Overview
@@ -2203,31 +2458,36 @@
         <div class="card grid-full" id="scoreDistributionCard">
           <h2>${I('chart')} Score Distribution <span class="badge">${formatMonth(currentMonth)}</span>
             <span class="spacer"></span>
+            <button class="icon-btn focus-toggle" id="focusAreaToggleBtn" onclick="toggleFocusBox()">${I('flag')} Focus Areas ${I('chevron')}</button>
             ${ratingLegendHTML}
           </h2>
+          <div class="focus-area-box" id="focusAreaBox" style="display:none;">
+            <div style="font-weight:700;font-size:12.5px;color:var(--grey-500);margin-bottom:8px;">Focus Areas — categories below 70%</div>
+            ${focusChipsHTML}
+          </div>
           ${sdHTML}
         </div>
 
-        <!-- Month-wise Score Chart -->
+        <!-- Month-wise Score Chart (Financial Year order: June → May) -->
         <div class="card grid-full" id="monthWiseScoreCard">
-          <h2>${I('calendar')} Month-wise Score <span class="badge">${userBranch} — ${currentYear}</span></h2>
+          <h2>${I('calendar')} Month-wise Score <span class="badge">${userBranch} — FY ${currentYear}–${parseInt(currentYear) + 1}</span></h2>
           <div class="chart-box" style="height:320px;"><canvas id="monthWiseChart"></canvas></div>
-          <p class="chart-hint">${I('chart')} The trend line traces ${userBranch}'s score across each month of ${currentYear}. Use the year dropdown above to view another year.</p>
+          <p class="chart-hint">${I('chart')} The trend line traces ${userBranch}'s score across each month of the financial year (June → May). Use the year dropdown above to switch to another financial year.</p>
         </div>
-
-        ${summaryHTML}
       `;
 
-      // Render Month-wise chart
+      renderScoreHighlightChart(roundedD.final_score, band);
       renderMonthWiseChart(userBranch);
     }
 
-    /* ===================== Month-wise Score trend chart (franchise) ===================== */
+    /* ===================== Month-wise Score trend chart (franchise) - Financial year order ===================== */
     async function renderMonthWiseChart(branch) {
       const canvas = document.getElementById('monthWiseChart');
       if (!canvas) return;
 
-      const results = await Promise.all(MONTH_LIST.map(async ([mv, ml]) => {
+      // Use financial year months (June to May)
+      const fyMonths = financialYearMonths(parseInt(currentYear));
+      const results = await Promise.all(fyMonths.map(async ([mv, ml]) => {
         try {
           const res = await fetch(
             `/api/dashboard/branch/${encodeURIComponent(branch)}?month=${mv}`);
@@ -2238,7 +2498,7 @@
         } catch (err) { return { month: mv, label: ml, score: null }; }
       }));
 
-      const labels = results.map(r => r.label.split(' ')[0].slice(0, 3));
+      const labels = results.map(r => r.label.split(' ')[0].slice(0, 3)); // e.g., Jun, Jul, ...
       const scores = results.map(r => r.score);
       const t = chartTextColor(),
         d2 = chartDimColor(),
@@ -2251,8 +2511,8 @@
 
       const ctx2d = canvas.getContext('2d');
       const gradient = ctx2d.createLinearGradient(0, 0, 0, 320);
-      gradient.addColorStop(0, isDarkTheme() ? 'rgba(37,99,235,0.35)' : 'rgba(37,99,235,0.20)');
-      gradient.addColorStop(1, isDarkTheme() ? 'rgba(37,99,235,0.02)' : 'rgba(37,99,235,0.0)');
+      gradient.addColorStop(0, isDarkTheme() ? 'rgba(220,38,38,0.35)' : 'rgba(220,38,38,0.20)');
+      gradient.addColorStop(1, isDarkTheme() ? 'rgba(220,38,38,0.02)' : 'rgba(220,38,38,0.0)');
 
       charts.monthWise = new Chart(canvas, {
         type: 'line',
@@ -2261,7 +2521,7 @@
           datasets: [{
             label: 'Score',
             data: scores,
-            borderColor: '#2563eb',
+            borderColor: '#dc2626',
             backgroundColor: gradient,
             borderWidth: 2.5,
             tension: 0.35,
@@ -2270,13 +2530,13 @@
             fill: 'origin',
             pointRadius: (ctx) => (ctx.raw === null ? 0 : 3.5),
             pointHoverRadius: 6,
-            pointBackgroundColor: '#2563eb',
-            pointBorderColor: isDarkTheme() ? '#1b1f28' : '#ffffff',
+            pointBackgroundColor: '#dc2626',
+            pointBorderColor: isDarkTheme() ? '#dc2626' : '#ffffff',
             pointBorderWidth: 2,
             pointHitRadius: 10,
             datalabels: {
               display: (ctx) => ctx.dataset.data[ctx.dataIndex] !== null,
-              color: '#2563eb',
+              color: '#dc2626',
               anchor: 'end',
               align: 'top',
               offset: 6,
@@ -2322,51 +2582,53 @@
       const submittedOnly = roundedData.filter(item => (item.rating || 'No Data') !== 'No Data');
       const sorted = [...submittedOnly].sort((a, b) => (b.final_score || 0) - (a.final_score || 0));
 
-      // Build the team view with filters, ranking, and branch-wise score
-      let html = `
-        <div class="card grid-full">
-          <h2>${I('chart')} Branch Performance Ranking <span class="badge">${formatMonth(currentMonth)}</span>
-            <span class="spacer"></span>
-            <span class="badge" style="background:rgba(22,163,74,0.10);color:#15803d;border-color:#16a34a;" id="rankingSubmittedBadge"></span>
-          </h2>
-          <div class="filter-chip-row cols-5">
-            <div class="filter-chip">
-              <div class="fc-icon">${I('calendar')}</div>
-              <div class="fc-body"><div class="fc-label">Year</div><select id="chartYearSelect" title="Year">${yearOptionsHTML(currentYear)}</select></div>
-            </div>
-            <div class="filter-chip">
-              <div class="fc-icon">${I('calendar')}</div>
-              <div class="fc-body"><div class="fc-label">Month</div><select id="chartMonthSelect" title="Month">${monthOptionsHTML(currentMonth)}</select></div>
-            </div>
-            <div class="filter-chip">
-              <div class="fc-icon">${I('dashboard')}</div>
-              <div class="fc-body"><div class="fc-label">Metric</div><select id="metricSelect" title="Metric">${METRIC_OPTIONS.map(m => `<option value="${m.value}">${m.label}</option>`).join('')}</select></div>
-            </div>
-            <div class="filter-chip">
-              <div class="fc-icon">${I('puzzle')}</div>
-              <div class="fc-body"><div class="fc-label">Sub-metric</div><select id="subMetricSelect" title="Sub-metric"></select></div>
-            </div>
-            <div class="filter-chip">
-              <div class="fc-icon">${I('sort')}</div>
-              <div class="fc-body"><div class="fc-label">Sort by</div><select id="sortSelect" title="Sort order"><option value="desc">High to Low</option><option value="asc">Low to High</option></select></div>
-            </div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px;">
-            <p class="chart-hint" style="margin:0;"></p>
-            <div class="ranking-legend" id="rankingLegend"></div>
-          </div>
-          <div class="ranking-list" id="rankingList"></div>
-        </div>
+      // Only show Top 5 / Bottom 5 for SUPERUSER
+      let html = '';
 
+      // Helper to build one ranking row (used by Top 5 / Bottom 5) - name + score only, no bar
+      function rankRowHTML(item, idx) {
+        const band = getRatingBand(item.final_score || 0);
+        const pct = Math.round(((item.final_score || 0) / 900) * 100);
+        return `
+          <div class="ranking-row" data-branch="${item.branch}" style="grid-template-columns:30px 1fr 76px 58px;">
+            <div class="ranking-rank">${idx + 1}</div>
+            <div class="ranking-name" style="margin-bottom:0;">${I('building')} ${item.branch}</div>
+            <div class="ranking-score">${item.final_score || 0} <span class="max">/900</span></div>
+            <div><span class="ranking-pct-badge" style="background:${band.color}22;color:${band.color};">${pct}%</span></div>
+          </div>`;
+      }
+
+      if (userRole === 'superuser') {
+        const top5 = sorted.slice(0, 5);
+        const bottom5 = [...sorted].slice(-5).reverse();
+
+        html += `
+        <div class="card">
+          <h2>${I('trophy')} Top 5 Branches <span class="badge">${formatMonth(currentMonth)}</span></h2>
+          <div class="ranking-list">
+            ${top5.length ? top5.map((item, idx) => rankRowHTML(item, idx)).join('') : noDataHTML('No branches have submitted data for this month yet.', null, { compact: true })}
+          </div>
+        </div>
+        <div class="card">
+          <h2>${I('warning')} Bottom 5 Branches <span class="badge">${formatMonth(currentMonth)}</span></h2>
+          <div class="ranking-list">
+            ${bottom5.length ? bottom5.map((item, idx) => rankRowHTML(item, idx)).join('') : noDataHTML('No branches have submitted data for this month yet.', null, { compact: true })}
+          </div>
+        </div>`;
+      }
+
+      // BRANCH-WISE SCORE as RED LINE CHART - visible to all (IT, Accounts, Superuser)
+      html += `
+        <!-- BRANCH-WISE SCORE as RED LINE CHART (TrendViewer style) -->
         <div class="card grid-full" id="overallMonthWiseCard">
           <h2>${I('building')} Branch-wise Score <span class="badge">All Branches — ${formatMonth(currentMonth)}</span></h2>
-          <div id="branchWiseChartBox" style="position:relative;height:400px;max-height:400px;overflow:hidden;">
+          <div class="chart-box branch-line" style="position:relative;height:380px;max-height:380px;">
             <canvas id="overallMonthWiseChart"></canvas>
           </div>
-          <p class="chart-hint">${I('chart')} Final score for every branch in ${formatMonth(currentMonth)}. <strong>Click a bar to open that branch's dashboard</strong>.</p>
+          <p class="chart-hint">${I('chart')} <strong style="color:#dc2626;">●</strong> Final score for every branch in ${formatMonth(currentMonth)} — sorted high to low. <strong>Click a data point to open that branch's dashboard</strong>.</p>
         </div>`;
 
-      if (sorted.length > 0) {
+      if (sorted.length > 0 && userRole === 'superuser') {
         html += `
           <div class="card grid-full">
             <h2>${I('dashboard')} All Branches — ${formatMonth(currentMonth)} <span class="badge">Click a row for full scoring</span></h2>
@@ -2411,242 +2673,18 @@
 
       content.innerHTML = html;
 
-      // Setup filters and charts
-      function refreshSubMetricSelect(selectEl, metric, selected) {
-        const subs = SUB_METRICS[metric] || [];
-        let html =
-          `<option value="overall"${(!selected || selected === 'overall') ? ' selected' : ''}>Overall (All Sub-metrics)</option>`;
-        subs.forEach(s => {
-          html +=
-            `<option value="${s.key}"${selected === s.key ? ' selected' : ''}>${s.label}</option>`;
-        });
-        selectEl.innerHTML = html;
-        selectEl.disabled = !subs.length;
+      // Wire up click-to-navigate for the Top 5 / Bottom 5 rows (SUPERUSER only)
+      if (userRole === 'superuser') {
+        document.querySelectorAll('.ranking-row').forEach(row =>
+          row.addEventListener('click', () => navigateToBranch(row.dataset.branch))
+        );
       }
 
-      function updatePerformanceChart() {
-        const configuredMax = getChartMax(chartMetric, chartSubMetric);
-        const filledOnly = lastAllBranchesData.filter(b => (b.rating || 'No Data') !== 'No Data');
-        const submittedBadge = document.getElementById('rankingSubmittedBadge');
-        if (submittedBadge) submittedBadge.textContent = `${filledOnly.length} / ${lastAllBranchesData.length} submitted`;
-
-        const rows = [...filledOnly].sort((a, b) => {
-          const av = getChartValue(a, chartMetric, chartSubMetric),
-            bv = getChartValue(b, chartMetric, chartSubMetric);
-          return chartSortOrder === 'desc' ? bv - av : av - bv;
-        });
-
-        const values = rows.map(r => getChartValue(r, chartMetric, chartSubMetric));
-        const dataMax = values.length ? Math.max(...values) : 0;
-        const axisMax = configuredMax === null ? Math.max(100, Math.ceil(dataMax * 1.15)) : configuredMax ?
-          Math.max(configuredMax, Math.ceil(dataMax * 1.15)) : Math.max(1, dataMax);
-
-        const legendEl = document.getElementById('rankingLegend');
-        if (legendEl) {
-          let items;
-          if (chartMetric === 'final_score' || chartMetric === 'rating_bands') {
-            items = RATING_BANDS.map(b => ({ label: b.range, color: b.color }));
-          } else if (chartMetric === 'penalty') {
-            items = [
-              { label: 'No Penalty', color: '#16a34a' },
-              { label: 'Moderate', color: '#d97706' },
-              { label: 'High', color: '#dc2626' }
-            ];
-          } else {
-            items = TIER_LEGEND.map(t => ({ label: t.sub, color: t.color }));
-          }
-          legendEl.innerHTML = items.map(it =>
-            `<div class="rl-item"><span class="rl-dot" style="background:${it.color};"></span>${it.label}</div>`
-          ).join('');
-        }
-
-        const isPercent = chartSubMetric !== 'overall' && findSubMetricCfg(chartMetric, chartSubMetric)
-          ?.isPercent;
-        const listEl = document.getElementById('rankingList');
-        if (!listEl) return;
-
-        if (!rows.length) {
-          listEl.innerHTML = noDataHTML('No branches have submitted data for this month yet.', null, { compact: true });
-          return;
-        }
-
-        listEl.innerHTML = rows.map((r, idx) => {
-          const val = getChartValue(r, chartMetric, chartSubMetric);
-          const color = getChartColor(r, chartMetric, chartSubMetric);
-          const widthPct = axisMax ? Math.max(3, Math.min(100, (val / axisMax) * 100)) : 0;
-          const displayVal = isPercent ? `${val}%` : val;
-          const maxLabel = configuredMax ? `/ ${configuredMax}` : '';
-          const pctOfMax = configuredMax ? Math.round((val / configuredMax) * 100) : (isPercent ?
-            val : null);
-          return `
-            <div class="ranking-row" data-branch="${r.branch}">
-              <div class="ranking-rank">${idx + 1}</div>
-              <div class="ranking-main">
-                <div class="ranking-name">${I('building')} ${r.branch}</div>
-                <div class="ranking-bar-track"><div class="ranking-bar-fill" style="width:${widthPct}%;background:${color};"></div></div>
-              </div>
-              <div class="ranking-score">${displayVal} ${maxLabel ? `<span class="max">${maxLabel}</span>` : ''}</div>
-              <div>${pctOfMax !== null ? `<span class="ranking-pct-badge" style="background:${color}22;color:${color};">${pctOfMax}%</span>` : ''}</div>
-            </div>`;
-        }).join('');
-
-        listEl.querySelectorAll('.ranking-row').forEach(row => row.addEventListener('click', () => navigateToBranch(
-          row.dataset.branch)));
-      }
-
-      // Branch-wise score chart - VERTICAL BARS
-      function renderBranchWiseScoreChart() {
-        const canvas = document.getElementById('overallMonthWiseChart');
-        const box = document.getElementById('branchWiseChartBox');
-        if (!canvas) return;
-
-        const rows = [...lastAllBranchesData].sort((a, b) => (b.final_score || 0) - (a.final_score || 0));
-
-        const labels = rows.map(r => r.branch);
-        const hasData = rows.map(r => (r.rating || 'No Data') !== 'No Data');
-        const scores = rows.map((r, i) => hasData[i] ? roundValue(r.final_score) : 0);
-        const colors = rows.map((r, i) => hasData[i] ?
-          getRatingBand(r.final_score || 0).color :
-          (isDarkTheme() ? '#3a3f4a' : '#d0d4dc'));
-
-        if (box) {
-          const barCount = rows.length;
-          const dynamicHeight = Math.max(280, barCount * 28 + 40);
-          box.style.height = dynamicHeight + 'px';
-        }
-
-        if (charts.overallMonthWise) {
-          charts.overallMonthWise.destroy();
-          charts.overallMonthWise = null;
-        }
-
-        const t = chartTextColor(),
-          d2 = chartDimColor(),
-          g2 = chartGridColor();
-
-        charts.overallMonthWise = new Chart(canvas, {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Final Score',
-              data: scores,
-              backgroundColor: colors,
-              borderRadius: 4,
-              borderSkipped: false,
-              categoryPercentage: 0.9,
-              barPercentage: 0.85,
-              datalabels: {
-                display: (ctx) => hasData[ctx.dataIndex],
-                color: t,
-                anchor: 'end',
-                align: 'end',
-                offset: 2,
-                font: { size: 9, weight: 'bold' },
-                formatter: (val, ctx) => hasData[ctx.dataIndex] ? val : ''
-              }
-            }]
-          },
-          options: {
-            indexAxis: 'x',
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { top: 20, right: 10, left: 10, bottom: 30 } },
-            plugins: {
-              legend: { display: false },
-              title: { display: false },
-              tooltip: {
-                callbacks: {
-                  title: (items) => items.length ? rows[items[0].dataIndex].branch : '',
-                  label: (item) => `Final Score: ${item.raw}/900`
-                }
-              }
-            },
-            scales: {
-              x: {
-                ticks: {
-                  color: d2,
-                  font: { size: 10, weight: '600' },
-                  maxRotation: 50,
-                  minRotation: 40,
-                  autoSkip: false,
-                  callback: function (value) {
-                    const label = this.getLabelForValue(value);
-                    return label.length > 14 ? label.slice(0, 14) + '…' : label;
-                  }
-                },
-                grid: { display: false }
-              },
-              y: {
-                min: 0,
-                max: 900,
-                ticks: { color: d2, font: { size: 10 } },
-                grid: { color: g2 }
-              }
-            },
-            onClick: (e, elements) => {
-              if (elements && elements.length > 0) {
-                const idx = elements[0].index;
-                const branch = rows[idx];
-                if (branch && hasData[idx]) navigateToBranch(branch.branch);
-              }
-            }
-          }
-        });
-      }
-
-      // Setup event listeners
-      const metricSelectEl = document.getElementById('metricSelect');
-      const subMetricSelectEl = document.getElementById('subMetricSelect');
-      const sortSelectEl = document.getElementById('sortSelect');
-      const chartYearSelectEl = document.getElementById('chartYearSelect');
-      const chartMonthSelectEl = document.getElementById('chartMonthSelect');
-
-      metricSelectEl.value = chartMetric;
-      sortSelectEl.value = chartSortOrder;
-      refreshSubMetricSelect(subMetricSelectEl, chartMetric, chartSubMetric);
-
-      metricSelectEl.addEventListener('change', function () {
-        chartMetric = this.value;
-        chartSubMetric = 'overall';
-        refreshSubMetricSelect(subMetricSelectEl, chartMetric, chartSubMetric);
-        updatePerformanceChart();
-      });
-
-      subMetricSelectEl.addEventListener('change', function () {
-        chartSubMetric = this.value;
-        updatePerformanceChart();
-      });
-
-      sortSelectEl.addEventListener('change', function () {
-        chartSortOrder = this.value;
-        updatePerformanceChart();
-      });
-
-      chartYearSelectEl.addEventListener('change', function () {
-        currentYear = this.value;
-        MONTH_LIST = monthListForYear(currentYear);
-        const monthPart = currentMonth.split('-')[1] || '01';
-        const candidate = `${currentYear}-${monthPart}`;
-        currentMonth = MONTH_LIST.some(([v]) => v === candidate) ? candidate : MONTH_LIST[0][0];
-        document.getElementById('yearSelector').value = currentYear;
-        document.getElementById('monthSelector').innerHTML = monthOptionsHTML(currentMonth);
-        document.getElementById('monthSelector').value = currentMonth;
-        loadDashboard();
-      });
-
-      chartMonthSelectEl.addEventListener('change', function () {
-        currentMonth = this.value;
-        document.getElementById('monthSelector').value = currentMonth;
-        loadDashboard();
-      });
-
-      // Initialize
-      updatePerformanceChart();
+      // Render the branch-wise score chart (visible to all)
       renderBranchWiseScoreChart();
 
-      // Branch table click and filter
-      if (sorted.length > 0) {
+      // Table search/filter (SUPERUSER only)
+      if (sorted.length > 0 && userRole === 'superuser') {
         document.querySelectorAll('#branchTableBody tr').forEach((row) => row.addEventListener('click', () =>
           navigateToBranch(row.dataset.branch)));
 
@@ -2670,6 +2708,147 @@
       }
     }
 
+    /* ===================== BRANCH-WISE SCORE as RED LINE CHART ===================== */
+    function renderBranchWiseScoreChart() {
+      const canvas = document.getElementById('overallMonthWiseChart');
+      const box = document.getElementById('overallMonthWiseCard');
+      if (!canvas) return;
+
+      // Sort branches by final score descending (high to low) for the line chart
+      const sortedBranches = [...lastAllBranchesData].sort((a, b) => (b.final_score || 0) - (a.final_score || 0));
+
+      const labels = sortedBranches.map(r => r.branch);
+      const hasData = sortedBranches.map(r => (r.rating || 'No Data') !== 'No Data');
+      const scores = sortedBranches.map((r, i) => hasData[i] ? roundValue(r.final_score) : null);
+
+      // Red color palette
+      const lineRed = '#dc2626';
+      const fillRed = isDarkTheme() ? 'rgba(220,38,38,0.18)' : 'rgba(220,38,38,0.12)';
+      const pointBg = '#dc2626';
+      const pointBorder = isDarkTheme() ? '#1b1f28' : '#ffffff';
+
+      if (charts.overallMonthWise) {
+        charts.overallMonthWise.destroy();
+        charts.overallMonthWise = null;
+      }
+
+      const t = chartTextColor(),
+        d2 = chartDimColor(),
+        g2 = chartGridColor();
+
+      // Build a gradient fill for the area under the line
+      const ctx2d = canvas.getContext('2d');
+      const gradient = ctx2d.createLinearGradient(0, 0, 0, 380);
+      gradient.addColorStop(0, isDarkTheme() ? 'rgba(220,38,38,0.35)' : 'rgba(220,38,38,0.25)');
+      gradient.addColorStop(0.6, isDarkTheme() ? 'rgba(220,38,38,0.08)' : 'rgba(220,38,38,0.05)');
+      gradient.addColorStop(1, isDarkTheme() ? 'rgba(220,38,38,0.0)' : 'rgba(220,38,38,0.0)');
+
+      charts.overallMonthWise = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Final Score',
+            data: scores,
+            borderColor: lineRed,
+            backgroundColor: gradient,
+            borderWidth: 2.8,
+            tension: 0.25,
+            cubicInterpolationMode: 'monotone',
+            spanGaps: true,
+            fill: 'origin',
+            pointRadius: (ctx) => {
+              const val = ctx.dataset.data[ctx.dataIndex];
+              return (val !== null && val !== undefined) ? 4.5 : 0;
+            },
+            pointHoverRadius: 8,
+            pointBackgroundColor: pointBg,
+            pointBorderColor: pointBorder,
+            pointBorderWidth: 2,
+            pointHitRadius: 14,
+            datalabels: {
+              display: (ctx) => {
+                const val = ctx.dataset.data[ctx.dataIndex];
+                return val !== null && val !== undefined;
+              },
+              color: lineRed,
+              anchor: 'end',
+              align: 'top',
+              offset: 5,
+              font: { size: 10, weight: '700' },
+              formatter: (val) => (val === null || val === undefined) ? '' : val
+            }
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: {
+              top: 30,
+              right: 20,
+              left: 10,
+              bottom: 30
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            title: { display: false },
+            tooltip: {
+              callbacks: {
+                title: (items) => {
+                  if (!items.length) return '';
+                  const idx = items[0].dataIndex;
+                  return sortedBranches[idx] ? sortedBranches[idx].branch : '';
+                },
+                label: (item) => {
+                  const val = item.raw;
+                  if (val === null || val === undefined) return 'No data';
+                  return `Score: ${val} / 900`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: d2,
+                font: { size: 10, weight: '600' },
+                maxRotation: 50,
+                minRotation: 40,
+                autoSkip: false,
+                callback: function (value) {
+                  const label = this.getLabelForValue(value);
+                  return label.length > 14 ? label.slice(0, 14) + '…' : label;
+                }
+              },
+              grid: { display: false }
+            },
+            y: {
+              min: 0,
+              max: 900,
+              ticks: {
+                color: d2,
+                font: { size: 10 },
+                stepSize: 100
+              },
+              grid: {
+                color: g2,
+                drawTicks: true
+              }
+            }
+          },
+          onClick: (e, elements) => {
+            if (elements && elements.length > 0) {
+              const idx = elements[0].index;
+              const branch = sortedBranches[idx];
+              if (branch && hasData[idx]) navigateToBranch(branch.branch);
+            }
+          }
+        }
+      });
+    }
+
     /* ===================== LOAD DASHBOARD ===================== */
     async function loadDashboard() {
       destroyCharts();
@@ -2687,8 +2866,24 @@
         content.innerHTML =
           `<div class="empty-state">${I('errorx')}<p>Error loading data: ${error.message}</p></div>`;
       }
+      updateBackButton();
     }
 
+    /* ===================== BACK BUTTON ===================== */
+    function updateBackButton() {
+      const backBtn = document.getElementById('backBtn');
+      if (!backBtn) return;
+
+      if (fromRole && fromRole !== 'franchise' && userRole === 'franchise') {
+        backBtn.href = `/dashboard?role=${fromRole}`;
+        backBtn.innerHTML = `${I('arrowleft')} Back to Dashboard`;
+      } else {
+        backBtn.href = '/login';
+        backBtn.innerHTML = `${I('arrowleft')} Logout`;
+      }
+    }
+
+    updateBackButton();
     loadDashboard();
   </script>
 

@@ -458,19 +458,6 @@
       color: var(--red-400);
     }
 
-    .formula-link {
-      display: block;
-      text-align: center;
-      margin-top: 6px;
-      color: var(--grey-500);
-      text-decoration: none;
-      font-size: 12.5px;
-    }
-
-    .formula-link:hover {
-      color: var(--red-400);
-    }
-
     .records-section {
       margin-top: 38px;
       padding-top: 26px;
@@ -765,7 +752,7 @@
     }
 
     .missing-popup .form-group {
-      max-width: 280px;
+      max-width: 320px;
       margin-bottom: 16px;
     }
 
@@ -1143,11 +1130,17 @@
         <div class="form-group">
           <label>Reporting Month <span class="required">*</span></label>
           <input type="hidden" id="reportMonth" value="2026-08">
-          <div class="combo-wrap">
-            <input type="text" id="reportMonthDisplay" placeholder="Type or select month..." autocomplete="off"
-              required>
-            <div class="combo-list" id="reportMonthList"></div>
+          <div style="display:flex; gap:8px;">
+            <select id="reportYear" title="Academic Year" style="max-width:118px;"></select>
+            <div class="combo-wrap" style="flex:1;">
+              <input type="text" id="reportMonthDisplay" placeholder="Type or select month..." autocomplete="off"
+                required>
+              <div class="combo-list" id="reportMonthList"></div>
+            </div>
           </div>
+          <div class="help-text">Academic year runs June – May. Pick the month you are currently filing in — the
+            form automatically saves it as the previous month's data (e.g. filing in June saves May data).</div>
+          <div class="help-text" id="reportMonthActualNote" style="color:var(--red-500); font-weight:600;"></div>
         </div>
       </div>
 
@@ -1246,12 +1239,14 @@
             <div class="form-group">
               <label>Branding/Signage (%)</label>
               <input type="number" id="brandingCompliance" value="0" min="0" max="100" step="1">
-              <div class="quarterly-help">Quarterly – editable in Jun, Sep, Dec, Mar</div>
+              <div class="quarterly-help">Quarterly – unlocks when filing in Jul, Oct, Jan or Apr (covers the prior
+                Jun/Sep/Dec/Mar quarter)</div>
             </div>
             <div class="form-group">
               <label>Audit/Mystery Visit (%)</label>
               <input type="number" id="mysteryAuditScore" value="0" min="0" max="100" step="1">
-              <div class="quarterly-help">Quarterly – editable in Jun, Sep, Dec, Mar</div>
+              <div class="quarterly-help">Quarterly – unlocks when filing in Jul, Oct, Jan or Apr (covers the prior
+                Jun/Sep/Dec/Mar quarter)</div>
             </div>
           </div>
         </div>
@@ -1266,7 +1261,8 @@
             <div class="form-group">
               <label>Satisfaction Score (%)</label>
               <input type="number" id="satisfactionScore" value="0" min="0" max="100" step="1">
-              <div class="quarterly-help">Quarterly – editable in Jun, Sep, Dec, Mar</div>
+              <div class="quarterly-help">Quarterly – unlocks when filing in Jul, Oct, Jan or Apr (covers the prior
+                Jun/Sep/Dec/Mar quarter)</div>
             </div>
             <div class="form-group"><label>Google Rating (1–5)</label><input type="number" id="googleRating" value="1"
                 min="1" max="5" step="0.1">
@@ -1367,9 +1363,12 @@
         <div class="form-group">
           <label>Filter — Month</label>
           <input type="hidden" id="filterMonth" value="2026-08">
-          <div class="combo-wrap">
-            <input type="text" id="filterMonthDisplay" placeholder="Type or select month..." autocomplete="off">
-            <div class="combo-list" id="filterMonthList"></div>
+          <div style="display:flex; gap:8px;">
+            <select id="filterYear" title="Academic Year" style="max-width:118px;"></select>
+            <div class="combo-wrap" style="flex:1;">
+              <input type="text" id="filterMonthDisplay" placeholder="Type or select month..." autocomplete="off">
+              <div class="combo-list" id="filterMonthList"></div>
+            </div>
           </div>
         </div>
         <div class="form-group">
@@ -1388,7 +1387,6 @@
     </div>
 
     <a href="/dashboard?role=it" class="back-link">← Back to Dashboard</a>
-    <a href="/formula" class="formula-link">📐 View Scoring Formula</a>
   </div>
 
   <script>
@@ -1560,25 +1558,86 @@
       onSelect: () => renderRecordsTable()
     });
 
-    // ---------- Months ----------
-    const MONTHS = [
-      { value: '2026-01', label: 'January 2026' },
-      { value: '2026-02', label: 'February 2026' },
-      { value: '2026-03', label: 'March 2026' },
-      { value: '2026-04', label: 'April 2026' },
-      { value: '2026-05', label: 'May 2026' },
-      { value: '2026-06', label: 'June 2026' },
-      { value: '2026-07', label: 'July 2026' },
-      { value: '2026-08', label: 'August 2026' },
-      { value: '2026-09', label: 'September 2026' },
-      { value: '2026-10', label: 'October 2026' },
-      { value: '2026-11', label: 'November 2026' },
-      { value: '2026-12', label: 'December 2026' }
+    // ---------- Academic Year & Months ----------
+    // Academic year runs June (Year N) through May (Year N+1).
+    // e.g. Academic Year 2026-27 = June 2026 ... May 2027, and the
+    // cycle repeats every year (Academic Year 2027-28 = June 2027 ... May 2028).
+    const CALENDAR_MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+      'September', 'October', 'November', 'December'
     ];
 
+    // Generic label for ANY "YYYY-MM" value — independent of which
+    // academic year is currently selected in a dropdown.
     function monthLabel(value) {
-      const m = MONTHS.find(x => x.value === value);
-      return m ? m.label : (value || '');
+      if (!value) return '';
+      const parts = String(value).split('-');
+      const year = parts[0];
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      if (!year || isNaN(monthIdx) || monthIdx < 0 || monthIdx > 11) return value;
+      return `${CALENDAR_MONTH_NAMES[monthIdx]} ${year}`;
+    }
+
+    // Shift a "YYYY-MM" value by `delta` calendar months (can be negative),
+    // correctly rolling the year over. Used to translate between the
+    // "filing month" shown in the Reporting Month dropdown and the
+    // "actual data month" that gets saved to the backend (one month back).
+    function shiftMonth(value, delta) {
+      if (!value) return value;
+      const parts = String(value).split('-');
+      let year = parseInt(parts[0], 10);
+      let month = parseInt(parts[1], 10);
+      if (isNaN(year) || isNaN(month)) return value;
+
+      month += delta;
+      while (month < 1) { month += 12; year -= 1; }
+      while (month > 12) { month -= 12; year += 1; }
+
+      return `${year}-${String(month).padStart(2, '0')}`;
+    }
+
+    function academicYearLabel(startYear) {
+      return `${startYear}-${String(startYear + 1).slice(-2)}`;
+    }
+
+    // [calendarMonthNumber, monthName, yearOffsetFromAcademicYearStart]
+    const ACADEMIC_YEAR_MONTH_DEFS = [
+      [6, 'June', 0], [7, 'July', 0], [8, 'August', 0], [9, 'September', 0],
+      [10, 'October', 0], [11, 'November', 0], [12, 'December', 0],
+      [1, 'January', 1], [2, 'February', 1], [3, 'March', 1],
+      [4, 'April', 1], [5, 'May', 1]
+    ];
+
+    function monthsForAcademicYear(startYear) {
+      return ACADEMIC_YEAR_MONTH_DEFS.map(([num, name, offset]) => {
+        const year = startYear + offset;
+        return {
+          value: `${year}-${String(num).padStart(2, '0')}`,
+          label: `${name} ${year}`,
+          monthNum: num
+        };
+      });
+    }
+
+    const ACADEMIC_YEAR_MIN = 2023;
+    const ACADEMIC_YEAR_MAX = 2035;
+
+    function academicYearOptionsHTML(selected) {
+      let html = '';
+      for (let y = ACADEMIC_YEAR_MIN; y <= ACADEMIC_YEAR_MAX; y++) {
+        html += `<option value="${y}"${Number(selected) === y ? ' selected' : ''}>${academicYearLabel(y)}</option>`;
+      }
+      return html;
+    }
+
+    // Given "YYYY-MM", figure out which academic-year start year it
+    // belongs to: June..December => same year, January..May => previous year.
+    function startYearForMonthValue(monthValue) {
+      if (!monthValue) return 2026;
+      const [yearStr, monthStr] = String(monthValue).split('-');
+      const year = parseInt(yearStr, 10);
+      const month = parseInt(monthStr, 10);
+      if (isNaN(year) || isNaN(month)) return 2026;
+      return month >= 6 ? year : year - 1;
     }
 
     function syncMonthDisplayFromValue(hiddenId, displayId) {
@@ -1590,10 +1649,10 @@
     syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay');
     syncMonthDisplayFromValue('filterMonth', 'filterMonthDisplay');
 
-    createCombobox({
+    const reportMonthCombo = createCombobox({
       inputId: 'reportMonthDisplay',
       listId: 'reportMonthList',
-      items: MONTHS,
+      items: monthsForAcademicYear(startYearForMonthValue(document.getElementById('reportMonth').value)),
       getLabel: m => m.label,
       onSelect: (m) => {
         document.getElementById('reportMonth').value = m.value;
@@ -1603,15 +1662,51 @@
       }
     });
 
-    createCombobox({
+    const filterMonthCombo = createCombobox({
       inputId: 'filterMonthDisplay',
       listId: 'filterMonthList',
-      items: MONTHS,
+      items: monthsForAcademicYear(startYearForMonthValue(document.getElementById('filterMonth').value)),
       getLabel: m => m.label,
       onSelect: (m) => {
         document.getElementById('filterMonth').value = m.value;
         renderRecordsTable();
       }
+    });
+
+    // ---------- Academic Year <select> wiring ----------
+    function setupYearSelect(selectId, monthHiddenId, monthDisplayId, combo, onAfterChange) {
+      const yearSelect = document.getElementById(selectId);
+      if (!yearSelect) return;
+
+      yearSelect.innerHTML = academicYearOptionsHTML(
+        startYearForMonthValue(document.getElementById(monthHiddenId).value)
+      );
+
+      yearSelect.addEventListener('change', function () {
+        const startYear = parseInt(this.value, 10);
+        const monthsList = monthsForAcademicYear(startYear);
+        combo.refreshItems(monthsList);
+
+        // Keep the same month name selected, just under the new academic year.
+        const currentValue = document.getElementById(monthHiddenId).value;
+        const currentMonthNum = currentValue ? parseInt(String(currentValue).split('-')[1], 10) : null;
+        const target = monthsList.find(m => m.monthNum === currentMonthNum) || monthsList[0];
+
+        document.getElementById(monthHiddenId).value = target.value;
+        document.getElementById(monthDisplayId).value = target.label;
+
+        if (onAfterChange) onAfterChange(target);
+      });
+    }
+
+    setupYearSelect('reportYear', 'reportMonth', 'reportMonthDisplay', reportMonthCombo, () => {
+      updateQuarterlyFields();
+      triggerCheck();
+      updatePendingStatus();
+    });
+
+    setupYearSelect('filterYear', 'filterMonth', 'filterMonthDisplay', filterMonthCombo, () => {
+      renderRecordsTable();
     });
 
     // ---------- Quarterly field logic ----------
@@ -1629,9 +1724,28 @@
       return [3, 6, 9, 12].includes(month);
     }
 
+    // The "Reporting Month" dropdown holds the FILING month (the month you
+    // are currently submitting data in). The form always saves data under
+    // the PREVIOUS calendar month (the actual data period). This helper
+    // returns that actual data month for whatever is currently selected.
+    function getActualDataMonth() {
+      return shiftMonth(getVal('reportMonth'), -1);
+    }
+
+    // Keeps the little note under the Reporting Month field in sync,
+    // telling the user exactly which month their submission will be saved as.
+    function updateActualMonthNote() {
+      const note = document.getElementById('reportMonthActualNote');
+      if (!note) return;
+      const actualMonth = getActualDataMonth();
+      note.textContent = actualMonth
+        ? `📌 This submission will be saved as ${monthLabel(actualMonth)} data.`
+        : '';
+    }
+
     function updateQuarterlyFields() {
-      const month = document.getElementById('reportMonth').value;
-      const isQS = isQuarterStart(month);
+      const actualMonth = getActualDataMonth();
+      const isQS = isQuarterStart(actualMonth);
 
       QUARTERLY_FIELDS.forEach(id => {
         const el = document.getElementById(id);
@@ -1650,6 +1764,7 @@
         }
       });
 
+      updateActualMonthNote();
       updatePendingStatus();
     }
 
@@ -1901,13 +2016,13 @@
 
     function getPendingFields() {
       const pending = [];
-      const month = getVal('reportMonth');
+      const actualMonth = getActualDataMonth();
 
       MONTHLY_REQUIRED_FIELDS.forEach(id => {
         if (!fieldIsFilled(id)) pending.push(id);
       });
 
-      if (isQuarterStart(month)) {
+      if (isQuarterStart(actualMonth)) {
         QUARTERLY_FIELDS.forEach(id => {
           if (!fieldIsFilled(id)) pending.push(id);
         });
@@ -1951,12 +2066,13 @@
 
     function updatePendingStatus() {
       const pending = getPendingFields();
+      const actualMonth = getActualDataMonth();
 
       QUARTERLY_FIELDS.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
 
-        const quarterActive = isQuarterStart(getVal('reportMonth'));
+        const quarterActive = isQuarterStart(actualMonth);
         if (quarterActive && fieldIsFilled(id)) {
           markFieldFilled(id, '✓ Filled for this quarter');
         } else {
@@ -2001,6 +2117,8 @@
       document.getElementById('falseReporting').value = 'No';
       document.getElementById('trainerMisconduct').value = 'No';
 
+      document.getElementById('reportYear').value = '2026';
+      reportMonthCombo.refreshItems(monthsForAcademicYear(2026));
       document.getElementById('reportMonth').value = '2026-08';
       syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay');
 
@@ -2043,11 +2161,13 @@
       RELATIVE_CLAMPS.forEach(([fieldId, boundId]) => clampRelative(fieldId, boundId));
       clampDropouts();
 
-      const month = getVal('reportMonth');
+      // The dropdown holds the FILING month; the payload always saves the
+      // ACTUAL data month, which is one calendar month earlier.
+      const actualMonth = getActualDataMonth();
 
       return {
         branch: getVal('branch'),
-        report_month: month,
+        report_month: actualMonth,
 
         revenue_target: getNum('revenueTarget'),
         revenue_actual: getNum('revenueActual'),
@@ -2074,10 +2194,10 @@
         crm_usage: getNum('crmUsage') / 100,
         report_submission: getNum('reportSubmission') / 100,
 
-        // Quarterly fields are submitted only when the selected month is a quarter month.
-        branding_compliance: isQuarterStart(month) ? getNum('brandingCompliance') / 100 : 0,
-        mystery_audit_score: isQuarterStart(month) ? getNum('mysteryAuditScore') / 100 : 0,
-        satisfaction_score: isQuarterStart(month) ? getNum('satisfactionScore') / 100 : 0,
+        // Quarterly fields are submitted only when the ACTUAL data month is a quarter month.
+        branding_compliance: isQuarterStart(actualMonth) ? getNum('brandingCompliance') / 100 : 0,
+        mystery_audit_score: isQuarterStart(actualMonth) ? getNum('mysteryAuditScore') / 100 : 0,
+        satisfaction_score: isQuarterStart(actualMonth) ? getNum('satisfactionScore') / 100 : 0,
 
         google_rating: getNum('googleRating'),
         complaints_received: getInt('complaintsReceived'),
@@ -2123,7 +2243,14 @@
       if (data.branch) document.getElementById('branch').value = data.branch;
 
       if (data.report_month) {
-        document.getElementById('reportMonth').value = data.report_month;
+        // data.report_month is the ACTUAL data month as stored on the backend.
+        // The Reporting Month dropdown displays the FILING month, which is
+        // one calendar month later.
+        const filingMonth = shiftMonth(data.report_month, 1);
+        const startYear = startYearForMonthValue(filingMonth);
+        document.getElementById('reportYear').value = String(startYear);
+        reportMonthCombo.refreshItems(monthsForAcademicYear(startYear));
+        document.getElementById('reportMonth').value = filingMonth;
         syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay');
       }
 
@@ -2185,6 +2312,8 @@
       updateQuarterlyFields();
 
       // Explicitly show which quarterly fields are filled.
+      // data.report_month is already the ACTUAL data month, so this check
+      // does not need any shifting.
       QUARTERLY_FIELDS.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -2198,6 +2327,9 @@
     }
 
     // ---------- Load into form ----------
+    // NOTE: `month` here is always expected to be the ACTUAL data month
+    // (the value stored on the backend), not the filing month shown in the
+    // dropdown. Callers are responsible for shifting before calling this.
     async function loadIntoForm(branch, month, opts) {
       opts = opts || {};
       const btn = opts.button || null;
@@ -2213,7 +2345,7 @@
         const response = await fetch(url);
 
         if (!response.ok) {
-          let message = `No saved data found for ${branch} — ${month}.`;
+          let message = `No saved data found for ${branch} — ${monthLabel(month)}.`;
           try {
             const error = await response.json();
             message = error.detail || message;
@@ -2382,12 +2514,12 @@
     // ---------- Check existing ----------
     function checkForExisting() {
       const branch = document.getElementById('branch').value.trim();
-      const month = document.getElementById('reportMonth').value;
+      const actualMonth = getActualDataMonth();
 
-      if (!branch || !month) return;
+      if (!branch || !actualMonth) return;
       if (document.body.classList.contains('editing')) return;
 
-      const existing = findExistingRecord(branch, month);
+      const existing = findExistingRecord(branch, actualMonth);
       if (existing) showConfirmPopup(existing, 'formCheck');
     }
 
@@ -2420,7 +2552,7 @@
     // ---------- Form buttons ----------
     document.getElementById('editBtn').addEventListener('click', async function () {
       const branch = getVal('branch');
-      const month = getVal('reportMonth');
+      const actualMonth = getActualDataMonth();
 
       if (!branch) {
         await showAppAlert('Please select a branch first.', { title: '⚠️ Branch Required' });
@@ -2432,19 +2564,19 @@
         return;
       }
 
-      if (!month) {
+      if (!actualMonth) {
         await showAppAlert('Please select a reporting month first.', { title: '⚠️ Month Required' });
         return;
       }
 
-      const existing = findExistingRecord(branch, month);
+      const existing = findExistingRecord(branch, actualMonth);
 
       if (existing) {
         showConfirmPopup(existing, 'formCheck');
         return;
       }
 
-      await loadIntoForm(branch, month, { button: this });
+      await loadIntoForm(branch, actualMonth, { button: this });
     });
 
     document.getElementById('clearBtn').addEventListener('click', async function () {
@@ -2522,7 +2654,8 @@
           const mode = result.mode ||
             (document.body.classList.contains('editing') ? 'updated' : 'created');
 
-          const savedMonth = payload.report_month;
+          const savedMonth = payload.report_month; // ACTUAL data month just saved
+          const filingMonthUsed = getVal('reportMonth'); // filing month as shown in the dropdown
 
           showSuccess(
             mode === 'updated'
@@ -2530,15 +2663,21 @@
               : 'Form created successfully!'
           );
 
+          const savedStartYear = startYearForMonthValue(savedMonth);
+          document.getElementById('filterYear').value = String(savedStartYear);
+          filterMonthCombo.refreshItems(monthsForAcademicYear(savedStartYear));
           document.getElementById('filterMonth').value = savedMonth;
           syncMonthDisplayFromValue('filterMonth', 'filterMonthDisplay');
 
           // Refresh records BEFORE clearing the form so the new/updated row is visible immediately.
           await renderRecordsTable();
 
-          // Keep current month selected in the form, but clear entered values.
+          // Keep the same FILING month selected in the form, but clear entered values.
           resetFormToZero();
-          document.getElementById('reportMonth').value = savedMonth;
+          const filingStartYear = startYearForMonthValue(filingMonthUsed);
+          document.getElementById('reportYear').value = String(filingStartYear);
+          reportMonthCombo.refreshItems(monthsForAcademicYear(filingStartYear));
+          document.getElementById('reportMonth').value = filingMonthUsed;
           syncMonthDisplayFromValue('reportMonth', 'reportMonthDisplay');
           updateQuarterlyFields();
 
@@ -2782,6 +2921,8 @@
 
     // ---------- Filter reset ----------
     document.getElementById('filterReset').addEventListener('click', function () {
+      document.getElementById('filterYear').value = '2026';
+      filterMonthCombo.refreshItems(monthsForAcademicYear(2026));
       document.getElementById('filterMonth').value = '2026-08';
       syncMonthDisplayFromValue('filterMonth', 'filterMonthDisplay');
       document.getElementById('filterBranch').value = '';
@@ -2792,8 +2933,9 @@
     document.getElementById('missingBtn').addEventListener('click', async function () {
       const initialMonth =
         document.getElementById('filterMonth').value ||
-        document.getElementById('reportMonth').value ||
+        getActualDataMonth() ||
         '2026-08';
+      const initialYear = startYearForMonthValue(initialMonth);
 
       const overlay = document.createElement('div');
       overlay.className = 'missing-popup-overlay';
@@ -2803,8 +2945,11 @@
           <h2>📋 Pending Items</h2>
 
           <div class="form-group">
-            <label>Month</label>
-            <select id="missingMonthSelect"></select>
+            <label>Academic Year & Month</label>
+            <div style="display:flex; gap:8px;">
+              <select id="missingYearSelect" style="max-width:118px;"></select>
+              <select id="missingMonthSelect" style="flex:1;"></select>
+            </div>
           </div>
 
           <p id="missingSummary" style="margin-bottom:12px;color:var(--grey-500);">Loading...</p>
@@ -2822,16 +2967,21 @@
         if (e.target === overlay) overlay.remove();
       });
 
+      const yearSelect = overlay.querySelector('#missingYearSelect');
       const monthSelect = overlay.querySelector('#missingMonthSelect');
 
-      MONTHS.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m.value;
-        opt.textContent = m.label;
-        monthSelect.appendChild(opt);
-      });
+      yearSelect.innerHTML = academicYearOptionsHTML(initialYear);
+      yearSelect.value = String(initialYear);
 
-      monthSelect.value = initialMonth;
+      function populateMissingMonths(startYear, selectedValue) {
+        const monthsList = monthsForAcademicYear(startYear);
+        monthSelect.innerHTML = monthsList.map(m =>
+          `<option value="${m.value}"${m.value === selectedValue ? ' selected' : ''}>${m.label}</option>`
+        ).join('');
+        if (!monthSelect.value) monthSelect.value = monthsList[0].value;
+      }
+
+      populateMissingMonths(initialYear, initialMonth);
 
       async function loadPendingFor(month) {
         const summaryEl = overlay.querySelector('#missingSummary');
@@ -2866,6 +3016,12 @@
             '<p class="missing-empty">Could not fetch submitted branches. Check /api/it/all.</p>';
         }
       }
+
+      yearSelect.addEventListener('change', () => {
+        const startYear = parseInt(yearSelect.value, 10);
+        populateMissingMonths(startYear, null);
+        loadPendingFor(monthSelect.value);
+      });
 
       monthSelect.addEventListener('change', () => loadPendingFor(monthSelect.value));
       loadPendingFor(initialMonth);
